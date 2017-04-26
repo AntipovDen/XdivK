@@ -1,10 +1,10 @@
 from numpy import matrix, sum
-from numpy.linalg import det
 from scipy.misc import comb
 from matplotlib import pyplot as plt
 from math import sqrt
 from fractions import Fraction
-from numpy.linalg.linalg import LinAlgError
+from sympy import Matrix, ones, symbols
+from sympy.solvers.solveset import linsolve
 
 n = 1000
 k = 2
@@ -35,23 +35,12 @@ def prob(i, j, lam):
     return pr
 
 def expectation(lam):
-    try:
-        p = matrix([[-prob(i, j, lam) for j in range(k)] for i in range(k)])
-        for i in range(k):
-            p[i, i] = -sum(p[i].tolist()[0]) + (Fraction(lam, n)) ** (k - i) * (Fraction(n - lam, n)) ** (n - k + i)
-        for i in range(k):
-            for j in range(k):
-                p[i, j] = float(p[i, j])
-        print(p)
-        return (p.getI()
-                * matrix([[1] for i in range(k)])).tolist()[0][0]
-    except LinAlgError:
-        for i in range(k):
-            for j in range(k):
-                print(p[i, j], end='\t')
-            print()
-        print(det(p))
-        exit(0)
+    p = Matrix([[-prob(i, j, lam) for j in range(k)] for i in range(k)])
+    for i in range(k):
+        p[(k + 1) * i] = -sum(p.row(i)) + (Fraction(lam, n)) ** (k - i) * (Fraction(n - lam, n)) ** (n - k + i)
+    return next(iter(linsolve((p, ones(k, 1)), symbols(', '.join(['x_{}'.format(i) for i in range(k)])))))[0]
+    # return (p ** (-1) * ones(k, 1))[0]
+
 
 
 
@@ -75,13 +64,13 @@ def trenar_min(f, a, b):
     return (a + b) / 2
 
 
-ph = 120
+ph = 2
 
-for k in range(8, 11):
+for k in range(2, 11):
     print(k)
-    lambdas = [Fraction(10 + i, 10) for i in range(190)]
-    plt.plot(lambdas, [float(expectation(lam)) for lam in lambdas], 'bo')
-    plt.show()
-    #print(float(trenar_min(expectation, 1, 20)), ph ** (1/k))
+    # lambdas = [Fraction(5 + i, 5) for i in range(45)] #[1 + 0.1 * i for i in range(190)]
+    # plt.plot(lambdas, [float(expectation(lam)) for lam in lambdas], 'bo')
+    # plt.show()
+    print(float(trenar_min(expectation, 1, k)), ph ** (1/k))
     ph *= (k + 1)
 
