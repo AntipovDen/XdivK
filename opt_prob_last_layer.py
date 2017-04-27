@@ -6,9 +6,9 @@ from fractions import Fraction
 from sympy import Matrix, ones, symbols
 from sympy.solvers.solveset import linsolve
 
-n = 1000
+n = 100
 k = 2
-phi = Fraction((3 - sqrt(5)) / 2)
+phi = Fraction(34/89) #Fraction((3 - sqrt(5)) / 2)
 
 def prob(i, j, lam):
     pr = 0
