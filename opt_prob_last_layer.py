@@ -3,9 +3,11 @@ from math import factorial
 from fractions import Fraction
 from sympy import Matrix, ones, symbols
 from sympy.solvers.solveset import linsolve
+from sys import argv
 
-n = 100
-k = 2
+
+n = int(argv[1])
+k = int(argv[2])
 phi = Fraction(34/89) #Fraction((3 - sqrt(5)) / 2)
 
 def prob(i, j, lam):
@@ -47,7 +49,7 @@ def trenar_min(f, a, b):
     d = b - (b - a) * phi
     f_a, f_b, f_c, f_d = f(a), f(b), f(c), f(d)
     while (b - a) > 0.0001:
-        print(float(a), float(b))
+        #print(float(a), float(b))
         if f_c > f_d:
             a, c, d = c, d, b - (b - c) * phi
             f_a, f_c, f_d = f_c, f_d, f(d)
@@ -62,13 +64,12 @@ def trenar_min(f, a, b):
     return (a + b) / 2
 
 
-ph = factorial(k)
-
-for k in range(2, 11):
-    print(k)
-    # lambdas = [Fraction(5 + i, 5) for i in range(45)] #[1 + 0.1 * i for i in range(190)]
-    # plt.plot(lambdas, [float(expectation(lam)) for lam in lambdas], 'bo')
-    # plt.show()
-    print(float(trenar_min(expectation, 1, k)), ph ** (1/k))
-    ph *= (k + 1)
+print(float(trenar_min(expectation, 1, k)), factorial(k) ** (1/k))
+# for k in range(2, 11):
+#     print(k)
+#     # lambdas = [Fraction(5 + i, 5) for i in range(45)] #[1 + 0.1 * i for i in range(190)]
+#     # plt.plot(lambdas, [float(expectation(lam)) for lam in lambdas], 'bo')
+#     # plt.show()
+#     print(float(trenar_min(expectation, 1, k)), ph ** (1/k))
+#     ph *= (k + 1)
 
