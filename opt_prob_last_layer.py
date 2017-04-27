@@ -1,7 +1,5 @@
-from numpy import matrix, sum
 from scipy.misc import comb
-from matplotlib import pyplot as plt
-from math import sqrt
+from math import factorial
 from fractions import Fraction
 from sympy import Matrix, ones, symbols
 from sympy.solvers.solveset import linsolve
@@ -64,7 +62,7 @@ def trenar_min(f, a, b):
     return (a + b) / 2
 
 
-ph = 2
+ph = factorial(k)
 
 for k in range(2, 11):
     print(k)
