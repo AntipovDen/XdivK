@@ -1,4 +1,5 @@
 from numpy import matrix, array
+from numpy.linalg import cond
 from scipy.misc import comb
 from math import factorial, sqrt
 from fractions import Fraction
@@ -59,23 +60,31 @@ def expectation(lam):
 
 
 
-def trenar_min(f, a, b):
+def trenary_min(f, a, b):
     c = a + (b - a) * phi
     d = b - (b - a) * phi
-    f_a, f_b, f_c, f_d = f(a), f(b), f(c), f(d)
+    f_c, f_d = f(c), f(d)
+    # arguments, values = [a, b, c, d], [f_a, f_b, f_c, f_d]
     while (b - a) > 0.0001:
         #print(float(a), float(b))
         if f_c > f_d:
             a, c, d = c, d, b - (b - c) * phi
-            f_a, f_c, f_d = f_c, f_d, f(d)
+            f_c, f_d = f_d, f(d)
+            # arguments.append(d)
+            # values.append(f_d)
         elif f_c < f_d:
             b, d, c = d, c, a + (b - c) * phi
-            f_b, f_d, f_c = f_d, f_c, f(c)
+            f_d, f_c = f_c, f(c)
+            # arguments.append(c)
+            # values.append(f_c)
         else:
             a, b = c, d
             c, d = a + (b - a) * phi, b - (b - a) * phi
-            f_a, f_b = f_c, f_d
             f_c, f_d = f(c), f(d)
+            # arguments.append(c, d)
+            # values.append(f_c, f_d)
+    # plt.plot(arguments, values, 'bo')
+    # plt.show()
     return (a + b) / 2
 
 
@@ -83,9 +92,9 @@ def trenar_min(f, a, b):
 
 for k in range(2, 11):
     ones = matrix([[1] for _ in range(k)])
-    print(k)
+    # print(k)
     # lambdas = [1 + 0.2 * i for i in range(5 * (k - 1) + 1)] #[1 + 0.1 * i for i in range(190)]
     # plt.plot(lambdas, [float(expectation(lam)) for lam in lambdas], 'bo')
     # plt.show()
-    print(float(trenar_min(expectation, 1, k)), factorial(k) ** (1/k))
+    print('\\hline\n{} & {:.3f} & {:.3f} \\tabularnewline'.format(k, float(trenary_min(expectation, 1, k)), factorial(k) ** (1 / k)))
 

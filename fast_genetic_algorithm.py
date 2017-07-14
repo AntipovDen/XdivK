@@ -35,8 +35,9 @@ def run(n, k, dist): #seems like it works
     run_number += 1
     while sum_x < n:
         iterations += 1
-        logfile.write('{}\n'.format(iterations))
-        logfile.flush()
+        if iterations % 1000 == 0:
+            logfile.write('{}\n'.format(iterations))
+            logfile.flush()
         alpha = dist()
         mutation = 0
         for i in range(n - sum_x): # flipping zeros
@@ -50,8 +51,9 @@ def run(n, k, dist): #seems like it works
     return iterations
 
 n = int(argv[1])
-
-for beta in 1, 1.1, 1.5, 2, 3:
+if len(argv) > 2:
+    beta = float(argv[2])
+# for beta in 1, 1.1, 1.5, 2, 3:
     with open('fga_{}_{:1.1f}.out'.format(n, beta), 'w') as f:
         logfile = open('fga_{}_{:1.1f}.log'.format(n, beta), 'w')
         for k in 2, 3, 5, 10:
@@ -59,16 +61,17 @@ for beta in 1, 1.1, 1.5, 2, 3:
             logfile.flush()
             f.write(str(get_statistics_fga(n, k, beta)))
             f.write(' ')
+            f.flush()
         logfile.close()
-
-with open('opo_{}.out'.format(n), 'w') as f:
-    logfile = open('opo_{}.log'.format(n), 'w')
-    for k in 2, 3, 5, 10:
-        logfile.write('k = {}\n'.format(k))
-        logfile.flush()
-        f.write((get_statistics_opo(n, k)))
-        f.write(' ')
-        f.flush()
-    logfile.close()
+else:
+    with open('opo_{}.out'.format(n), 'w') as f:
+        logfile = open('opo_{}.log'.format(n), 'w')
+        for k in 2, 3, 5, 10:
+            logfile.write('k = {}\n'.format(k))
+            logfile.flush()
+            f.write(str((get_statistics_opo(n, k))))
+            f.write(' ')
+            f.flush()
+        logfile.close()
 
 
