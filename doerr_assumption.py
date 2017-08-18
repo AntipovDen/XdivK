@@ -65,7 +65,9 @@ def expectation_original(lamb):
         exit(0)
 
 
-def expectation_doerr():
+def expectation_doerr(lamb):
+    global lam
+    lam = lamb
     try:
         p = [[-prob(i, j) for j in range(k)] for i in range(k)]
         for i in range(k):
@@ -128,18 +130,23 @@ def trenary_min(f, a, b):
 
 # print(float(trenar_min(expectation, 1, k)), factorial(k) ** (1/k))
 
-for k in range(2, 11):
-    break #TODO: delete it!!!!!!!
+for k in 2, 10:#range(10, 11):
     ones = matrix([[1] for _ in range(k)])
     print(k)
     lambdas = [1 + 0.2 * i for i in range(5 * (k - 1) + 1)] #[1 + 0.1 * i for i in range(190)]
-    plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'bo')
-    plt.plot(lambdas, [float(expectation_simplified_probabilities(lam)) for lam in lambdas], 'ro')
+    plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'b-')
+    plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'bo', label='Original')
+    plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'r-')
+    plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'ro', label='Fall to state 0')
+    plt.legend(loc=4)
+    plt.xlabel('$\\lambda$')
+    plt.ylabel('expectation')
     plt.show()
     # print('\\hline\n{} & {:.3f} & {:.3f} \\tabularnewline'.format(k, float(trenary_min(expectation, 1, k)), factorial(k) ** (1 / k)))
     # print('k = {}'.format(k))
     # print(expectation_original())
     # print(expectation_doerr())
+exit(0)
 
 # trying to find the distribution of being in every state after n steps
 
