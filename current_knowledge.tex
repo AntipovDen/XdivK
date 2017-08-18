@@ -62,8 +62,9 @@ The exact value of this probabilities is quite complicated:
 
 \begin{align*}
   p_i^j = \begin{cases}
-    \sum_{m = 0}^{k - j} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\lambda}{n}\right)^{j - i + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - j + i - 2m}, \text{ if } j > i \\
-      \sum_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\lambda}{n}\right)^{i - j + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - i + j - 2m}, \text{ if } j < i \\
+    \sum\limits_{m = 0}^{k - j} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\lambda}{n}\right)^{j - i + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - j + i - 2m}, \text{ if } j > i \\
+      \sum\limits_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\lambda}{n}\right)^{i - j + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - i + j - 2m}, \text{ if } j < i \\
+      1 - \sum\limits_{m = 0, m \ne i}^{k + 1} p_i^m, \text{ if } j = i \\
   \end{cases}
 \end{align*}
 
