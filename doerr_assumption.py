@@ -82,7 +82,8 @@ def expectation_doerr():
         exit(0)
 
 def expectation_my_assumption(lam):
-    return n ** k * e ** lam / sum([lam ** i * (factorial(k) // factorial(i)) for i in range(1, k + 1)])
+    #return comb(n, k) * e ** lam / sum([lam ** i / factorial(i) for i in range(1, k + 1)])
+    return sum([comb(n, j) for j in range(1, k + 1)]) / sum([comb(n, j) * (lam / n) ** j * (1 - lam / n) ** (n - j) for j in range(1, k + 1)])
 
 def expectation_simplified_probabilities(lamb):
     global lam
@@ -129,28 +130,30 @@ def trenary_min(f, a, b):
 # print(float(trenar_min(expectation, 1, k)), factorial(k) ** (1/k))
 
 for k in range(2, 11):
-    break #TODO: delete it!!!!!!!
+    break
     ones = matrix([[1] for _ in range(k)])
     print(k)
     lambdas = [1 + 0.2 * i for i in range(5 * (k - 1) + 1)] #[1 + 0.1 * i for i in range(190)]
     plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'bo')
-    plt.plot(lambdas, [float(expectation_simplified_probabilities(lam)) for lam in lambdas], 'ro')
+    plt.plot(lambdas, [float(expectation_my_assumption(lam)) for lam in lambdas], 'ro')
     plt.show()
     # print('\\hline\n{} & {:.3f} & {:.3f} \\tabularnewline'.format(k, float(trenary_min(expectation, 1, k)), factorial(k) ** (1 / k)))
     # print('k = {}'.format(k))
     # print(expectation_original())
     # print(expectation_doerr())
 
+# exit(0)
 # trying to find the distribution of being in every state after n steps
 
 
-k = 4
-n = 50
+k = 6
+n = 100
 lam = 1
 x = matrix([1] + [0 for _ in range(k - 1)])
 print(x)
 p = [[prob(i, j) for j in range(k)] for i in range(k)]
 for i in range(k):
+
     p[i][i] = 1 - sum(p[i]) - prob(i, k)
 
 for i in range(k):
@@ -158,7 +161,8 @@ for i in range(k):
         p[i][j] /= 1 - prob(i, k)
 p = matrix(p)
 print(p)
-for _ in range(10000000):
+print(matrix([(1 - prob(i, k)) * comb(n, k - i) / sum([(1 - prob(i, k)) *comb(n, k - i)  for i in range(k)]) for i in range(k)]))
+for _ in range(100000000):
     # print(x, sum([x[0, _] for _ in range(k)]))
     x = x * p
 print(x, sum([x[0, _] for _ in range(k)]))
@@ -170,3 +174,10 @@ print(x, sum([x[0, _] for _ in range(k)]))
 #[[  9.42677753e-01   4.90977855e-02   2.02464167e-03   6.19706302e-05  1.24461781e-06]] 0.993863395622
 
 #[[  9.16892866e-01   7.80331987e-02   4.87635029e-03   1.97585442e-04]] 1.0
+
+#[[  1.00000000e+00   8.51063830e-02   5.31914894e-03   2.17108120e-04]]
+
+# [[  9.37569802e-01   5.92149349e-02   3.08411119e-03   1.27179843e-04
+#     3.89326050e-06   7.86517272e-08]]
+# [[  9.37569803e-01   5.92149349e-02   3.08411118e-03   1.27179795e-04   3.89311510e-06   7.83609285e-08]] 1.0
+# [[  9.37569803e-01   5.92149349e-02   3.08411118e-03   1.27179795e-04   3.89311510e-06   7.83609285e-08]]
