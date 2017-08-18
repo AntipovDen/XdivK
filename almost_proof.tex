@@ -230,7 +230,8 @@ Our aim is to show that $T_1 = o(1/p_{end}^*)$ and $T_2 = 1/p_{end}^* + o(1/p_{e
 Consider $T_1$:
 
 \begin{align*}
-  T_1 =  \sum\limits_{t = 1}^{\delta} t p_{end}(t) \prod\limits_{s = 0}^{t - 1} (1 - p_{end}(s))
+  T_1 &=  \sum\limits_{t = 1}^{\delta} t p_{end}(t) \prod\limits_{s = 0}^{t - 1} (1 - p_{end}(s)) \\
+  &\le \max\limits_{t \in [1, \delta]}(p_{end}(t)) \sum\limits_{t = 1}^{\delta} t (1 - p_{end}(1))^{t - 1} \\
 \end{align*}
 \end{proof}
 
