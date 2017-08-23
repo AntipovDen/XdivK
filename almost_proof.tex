@@ -164,7 +164,7 @@ where $C_0$ is some constant. \textit{One of the spaces in this section is that 
 
 Now we can say that $|p_{end}^* - p_{end}(t)| \le C_0 |\lambda_2|^t$
 
-Next space is proving that $\lambda_2 < const(n) < 1.$ It is the next space in this section, however the main idea of proving it is based on the Theorem 1 from \cite{secondev}. As experiments has shown, the value of $\lambda_2$ does not depend on $n$ but slightly depend on $k$ and is always less then $0.7$.
+Next space is proving that $\lambda_2 < const(n) < 1.$ It is the next space in this section, however the main idea of proving it is based on the Theorem 1 from \cite{secondev} (\textit{Unfortunately, as I found empirically, constant from that theorem is very close to one, so it is not the best way}). As experiments has shown, the value of $\lambda_2$ does not depend on $n$ but slightly depend on $k$ and is always less then $0.7$.
 
 If we fill the spaces, then we will be able to prove that  $|p_{end}^* - p_{end}(t)|$ is geometric progression.
 
@@ -204,7 +204,7 @@ To prove Theorem~\ref{runtime_th} we need some extra facts.
     &= p_0^k \sum\limits_{i = 0}^{k - 1} \lambda^{-i} \frac{k!}{(k - i)!} (1 + o(1))
   \end{align*}
 
-  If we consider $\lambda$ and $k$ as constants that does not depend on $n$, then Eq.2 together with the fact that $p_0^k < p_}end^*$ proves the lemma.
+  If we consider $\lambda$ and $k$ as constants that does not depend on $n$, then Eq.2 together with the fact that $p_0^k < p_{end}^*$ proves the lemma.
 \end{proof}
 
 Now we are ready to prove Theorem~\ref{runtime_th}.
@@ -232,7 +232,58 @@ Consider $T_1$:
 \begin{align*}
   T_1 &=  \sum\limits_{t = 1}^{\delta} t p_{end}(t) \prod\limits_{s = 0}^{t - 1} (1 - p_{end}(s)) \\
   &\le \max\limits_{t \in [1, \delta]}(p_{end}(t)) \sum\limits_{t = 1}^{\delta} t (1 - p_{end}(1))^{t - 1} \\
+  &\le \max\limits_{t \in [1, \delta]}(p_{end}(t))  \frac{1 - (1 - p_0^k)^\delta(1 + \delta p_0^k)}{(p_0^k)^2}.
 \end{align*}
+
+As it was shown that $|p_{end}(t) - p_{end}^*|$ is a decreasing sequence and $p_{end}(1) = p_0^k = \Theta(p_{end}^*)$ , then $\max\limits_{t \in [1, \delta]}(p_{end}(t)) = O(p_0^k)$. Then $\frac{\max\limits_{t \in [1, \delta]}(p_{end}(t))}{(p_0^k)^2} = O(\frac{1}{p_0^k})$.
+Also as $\delta = o(\frac{1}{p_0^k})$, then $\lim\limits_{n \to + \infty} (1 - p_0^k)^\delta = 1$ and $\lim\limits_{n \to + \infty} (1 + \delta p_0^k) = 1$. So it gives us:
+
+\begin{align*}
+  T_1 = o(1) \cdot O\left(\frac{1}{p_0^k}\right) = o\left(\frac{1}{p_0^k}\right).
+\end{align*}
+
+Now consider $T_2$:
+
+\begin{align*}
+  T_2 &= \sum\limits_{t = \delta + 1}^{+\infty} t p_{end}(t) \prod\limits_{s = 0}^{t - 1} (1 - p_{end}(s)) \\
+      &= \prod\limits_{s = 0}^{\delta - 1} (1 - p_{end}(s)) \sum\limits_{t = \delta + 1}^{+\infty} t p_{end}(t) \prod\limits_{s = \delta + 1}^{t - 1} (1 - p_{end}(s))
+\end{align*}
+
+First, consider the factor we put out of the sum:
+\begin{align*}
+  1 > \prod\limits_{s = 0}^{\delta - 1} (1 - p_{end}(s)) > (1 - p_0^k)^\delta \xrightarrow[n \to +\infty]{} 1.
+\end{align*}
+
+So we can consider this factor as $(1 + o(1)).$
+
+As $\lim\limits_{t \to +\infty} p_{end}(t) = p_{end}^*$, then $\exists \varepsilon > 0$ $\forall t > \delta: |p_{end}(t) - p_{end}^*| < \varepsilon$. So we can say that $\forall t > \delta$ $p_{end}^* - \varepsilon < p_{end}(t) < p_{end}^* + \varepsilon.$
+
+Here we need $\varepsilon$ to be $o(p_{end}^*).$ If we assume that $|p_{end}(t) - p_{end}^*|$ is bounded aboce by geometric progression with a common ratio equal to some constant $q < 1$, then we can choose $\delta = \sqrt{\frac{1}{p_{end}^*}}$ and we will have $\varepsilon < q^{\sqrt{1/p_{end}^*}}= o(p_{end}^*).$
+
+Introducing $\varepsilon$ gives us the following bounds for $T_2:$
+
+\begin{align*}
+T_2 &\ge (1 + 0(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* - \varepsilon) (1 - p_{end}^* - \varepsilon)^(t - \delta) \\
+T_2 &\le (1 + 0(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^(t - \delta)
+\end{align*}
+
+An as long as we can consider $\varepsilon = o(p_{end}^*),$ then both bounds are asymptotically equal. Here we consider only the upper bound, as the lower one can be considered in a similar way.
+
+\begin{align*}
+  T_2 &\le (1 + 0(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^(t - \delta) \\
+  &= (1 + 0(1)) \sum\limits_{t = 1}^{+\infty} (t + \delta) (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^t \\
+  &= (1 + o(1)) (p_{end}^* + \varepsilon) \left(\sum\limits_{t = 1}^{+\infty} t (1 - p_{end}^* + \varepsilon)^t +  \sum\limits_{t = 1}^{+\infty} \delta (1 - p_{end}^* + \varepsilon)^t \right) \\
+  &= (1 + o(1)) (p_{end}^* + \varepsilon) \left( \frac{1 - p_{end}^* + \varepsilon}{(p_{end}^* - \varepsilon)^2} + \frac{\delta}{p_{end}^* - \varepsilon}\right) \\
+  &= (1 + o(1)) p_{end}^* \left( \frac{1}{p_{end}^{*2}} + o\left(\frac{1}{p_{end}^{*2}}\right)\right) \\
+  &= (1 + o(1))  \frac{1}{p_{end}^*}.
+\end{align*}
+
+Summing up:
+
+\begin{align*}
+T = T_1 + T_2 = \frac{1}{p_{end}^*} + o\left(\frac{1}{p_{end}^*}\right).
+\end{align*}
+
 \end{proof}
 
 \printbibliography
