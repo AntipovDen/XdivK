@@ -297,23 +297,43 @@ T = T_1 + T_2 = \frac{1}{p_{end}^*} + o\left(\frac{1}{p_{end}^*}\right).
 The optimal value of $\lambda$ must maximize $p_{end}^*$. Consider $p_{end}^*:$
 
 \begin{align*}
-p_{end}^* &= C\sum\limits_{i = 0}^{k - 1} (1 - p_i^k) \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}  \left(1 - \frac{\lambda}{n} \right)^{n - k + i}
+p_{end}^* &= C\sum\limits_{i = 0}^{k - 1} (1 - p_i^k) \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}  \left(1 - \frac{\lambda}{n} \right)^{n - k + i} \\
 &= (1 + o(1))Ce^{-\lambda}\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}.
 \end{align*}
 
 It is easy to see that for $\lambda = 0$ and for $\lambda \to +\infty$ $p_{end}^*(\lambda) = 0$. So as long as $p_{end}^*(\lambda)$ is a continious function, we aim to find zeros of its derivative. As we need to find \textit{asyptotically optimal} value for $\lambda$, then it will be easier to consider approximate value of $p_{end}^*:$
 
 \begin{align*}
- p_{end}^*  \approx p_a = Ce^{-\lambda}\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}
+ p_{end}^*  \approx p_a &= Ce^{-\lambda}\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i} \\
+                        &= Ce^{-\lambda}\sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}
 \end{align*}
 
 Its derivative:
 
 \begin{align*}
-(p_a)' = C
+(p_a)' &= Ce^{-\lambda}(\sum\limits_{i = 1}^{k} \binom{n}{i} \frac{i\lambda^{i - 1}}{n^i} - \sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}) \\
+       &= Ce^{-\lambda}(\sum\limits_{i = 0}^{k - 1} \binom{n}{i + 1} \frac{(i + 1)\lambda^i}{n^{i + 1}} - \sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \left(\binom{n}{i + 1} \frac{(i + 1)\lambda^{i}}{n^{i + 1}} - \binom{n}{i} \frac{\lambda^i}{n^i} \right) - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \left(\binom{n}{i} \frac{i + 1}{n} - \binom{n}{i} \right) - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
 \end{align*}
 
+$(p_a)' = 0$ only if $\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} - \binom{n}{k} \frac{\lambda^k}{n^k} \right) = 0$. Let us consider the last equation more precicely.
 
+For all $i \in [1; k - 1]:$ 
+\begin{align*}
+  \binom{n - 1}{i - 1}\frac{\lambda^i}{n^i} = \frac{\lambda^i}{(i - 1)!} \frac{(n - 1)\cdot(n - 2)\cdots(n - i + 1)}{n^i} = \frac{\lambda^i}{(i - 1)!} (1/n + o(1/n))
+\end{align*}
+
+Thus, $\sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} = o(1).$
+
+We can say in the same way that $\binom{n}{k} \frac{\lambda^k}{n^k} = \frac{\lambda^k}{k!} (1 + o(1))$. So we have a simplified derivative of $p_a:$
+
+\begin{align*}
+(p_a)' = 1 - \frac{\lambda^k}{k!} + o(1).
+\end{align*}
+
+It means that if $\lambda \ne \sqrt[k]{k!}$, then for some large $n$ there is a neighbourhood of this value that does not contain zero of the derivative. At the same time if $\lambda = \sqrt[k]{k!}$, then $\forall \varepsilon > 0$ $\exists N$ $\forall n > N$ $|(p_a)'| < \varepsilon$. So, the only value of $\lambda$ that can be considered as asymptotically optimal is $\lambda = \sqrt[k]{k!}$.
 
 \printbibliography
 
