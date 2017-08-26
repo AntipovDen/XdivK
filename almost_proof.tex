@@ -269,15 +269,15 @@ Here we need $\varepsilon$ to be $o(p_{end}^*).$ If we assume that $|p_{end}(t) 
 Introducing $\varepsilon$ gives us the following bounds for $T_2:$
 
 \begin{align*}
-T_2 &\ge (1 + O(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* - \varepsilon) (1 - p_{end}^* - \varepsilon)^{(t - \delta)} \\
-T_2 &\le (1 + O(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^{(t - \delta)}
+T_2 &\ge (1 + o(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* - \varepsilon) (1 - p_{end}^* - \varepsilon)^{(t - \delta)} \\
+T_2 &\le (1 + o(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^{(t - \delta)}
 \end{align*}
 
 And as long as we can consider $\varepsilon = o(p_{end}^*),$ then both bounds are asymptotically equal. Here we consider only the upper bound, as the lower one can be considered in a similar way.
 
 \begin{align*}
-  T_2 &\le (1 + O(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^{(t - \delta)} \\
-  &= (1 + O(1)) \sum\limits_{t = 1}^{+\infty} (t + \delta) (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^t \\
+  T_2 &\le (1 + o(1)) \sum\limits_{t = \delta + 1}^{+\infty} t (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^{(t - \delta)} \\
+  &= (1 + o(1)) \sum\limits_{t = 1}^{+\infty} (t + \delta) (p_{end}^* + \varepsilon) (1 - p_{end}^* + \varepsilon)^t \\
   &= (1 + o(1)) (p_{end}^* + \varepsilon) \left(\sum\limits_{t = 1}^{+\infty} t (1 - p_{end}^* + \varepsilon)^t +  \sum\limits_{t = 1}^{+\infty} \delta (1 - p_{end}^* + \varepsilon)^t \right) \\
   &= (1 + o(1)) (p_{end}^* + \varepsilon) \left( \frac{1 - p_{end}^* + \varepsilon}{(p_{end}^* - \varepsilon)^2} + \frac{\delta}{p_{end}^* - \varepsilon}\right) \\
   &= (1 + o(1)) p_{end}^* \left( \frac{1}{p_{end}^{*2}} + o\left(\frac{1}{p_{end}^{*2}}\right)\right) \\
