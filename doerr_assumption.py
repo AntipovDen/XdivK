@@ -131,30 +131,29 @@ def trenary_min(f, a, b):
 
 # print(float(trenar_min(expectation, 1, k)), factorial(k) ** (1/k))
 
-for k in 2, 10:#range(10, 11):
-    ones = matrix([[1] for _ in range(k)])
-    print(k)
-    lambdas = [1 + 0.2 * i for i in range(5 * (k - 1) + 1)] #[1 + 0.1 * i for i in range(190)]
-    plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'b-')
-    plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'bo', label='Original')
-    plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'r-')
-    plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'ro', label='Fall to state 0')
-    plt.legend(loc=4)
-    plt.xlabel('$\\lambda$')
-    plt.ylabel('expectation')
-
-    plt.show()
+# for k in 2, 10:#range(10, 11):
+#     ones = matrix([[1] for _ in range(k)])
+#     print(k)
+#     lambdas = [1 + 0.2 * i for i in range(5 * (k - 1) + 1)] #[1 + 0.1 * i for i in range(190)]
+#     plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'b-')
+#     plt.plot(lambdas, [float(expectation_original(lam)) for lam in lambdas], 'bo', label='Original')
+#     plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'r-')
+#     plt.plot(lambdas, [float(expectation_doerr(lam)) for lam in lambdas], 'ro', label='Fall to state 0')
+#     plt.legend(loc=4)
+#     plt.xlabel('$\\lambda$')
+#     plt.ylabel('expectation')
+#
+#     plt.show()
     # print('\\hline\n{} & {:.3f} & {:.3f} \\tabularnewline'.format(k, float(trenary_min(expectation, 1, k)), factorial(k) ** (1 / k)))
     # print('k = {}'.format(k))
     # print(expectation_original())
     # print(expectation_doerr())
-exit(0)
 
 # exit(0)
 # trying to find the distribution of being in every state after n steps
 
 
-k = 6
+k = 10
 n = 100
 lam = 1
 x = matrix([1] + [0 for _ in range(k - 1)])
@@ -170,10 +169,10 @@ for i in range(k):
 p = matrix(p)
 print(p)
 print(matrix([(1 - prob(i, k)) * comb(n, k - i) / sum([(1 - prob(i, k)) *comb(n, k - i)  for i in range(k)]) for i in range(k)]))
-for _ in range(100000000):
+for _ in range(100):
     # print(x, sum([x[0, _] for _ in range(k)]))
     x = x * p
-print(x, sum([x[0, _] for _ in range(k)]))
+print('\t'.join(['{}'.format(x[0, i]) for i in range(k)]), sum([x[0, _] for _ in range(k)]))
 #[[  8.91552912e-01   9.79728475e-02   9.58430029e-03   8.24455939e-04  6.13956550e-05   3.87762028e-06   2.01959356e-07   8.32818763e-09   2.54911779e-10   5.11979754e-12]] 0.999999999349
 #[[  8.86252798e-01   9.73904174e-02   9.52732344e-03   8.19554704e-04  6.10306694e-05   3.85456856e-06   2.00758746e-07   8.27867813e-09   2.53396377e-10   5.08936131e-12]] 0.994055188222
 

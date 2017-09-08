@@ -1,0 +1,329 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+
+In this document I have summed up all the current knowledge about the optimal value of the mutation rate for the $(1 + 1)$-ES optimizing a function with a plateau around its global optima of radius $k$. This paper may be considered as a skeleton of the final proof, as I believe that I can not finish it only because of lack of knowledge and experience in some areas of linear algebra. First three sections are identical to the first three sections of the previous paper ("current progress"), but with fixed bugs in math and in my English.
+
+\section{Problem statement}
+
+We consider simple $(1 + 1)$-ES. It has only one individual in population and on each iteration it creates a new individual by mutating each bit of the current individual with probability of $\frac{\lambda}{n}$, where $\lambda$ is a mutation rate that is a fixed constant during an algorithm run. It accepts the new individual if and only if new individual's fitness value is not worse then the fitness value of the current individual.
+
+At first we considered \XdK function. But it seemed too complicated, so we simplified it to the following function $F$ that has some parameter $k$, as \XdK does:
+
+\begin{align*}
+  F(x) =
+  \begin{cases}
+    \OM(x), \text{ if } \OM(x) \le n - k \\
+    n - k, \text{ if } n - k < \OM(x) < n \\
+    n, \text{ if } \OM(x) = n \\
+  \end{cases}
+\end{align*}
+
+Our aim is to find the optimal value of the mutation rate $\lambda$ that minimizes the expected runtime of the algorithm. If we reach our goal, we will be able to compare the considered algorithm with the Fast Genetic Algorithm.
+
+\section{First subproblem}
+As passing over the plateau in the end of the optimization process requires most time (at least $\Omega(n^2)$ for $k \ge 2$, while reaching the plateau requires only $O(n \log n)$), we are most interested in finding the optimal value of $\lambda$ for passing the plateau. So the first subproblem (that is actually our source problem) is to find a dependence of exact expected runtime of passing the plateau on the mutation rate.
+
+\section{Notation}
+
+We consider a Markov chain that illustrates the behaviour of the considered algorithm on the plateau of the function $F$. It has $k + 1$ states that are numbered from $0$ to $k$. If the algorithm is in state $i$, then the current individual has exactly $n - k + i$ one-bits in it. State $k$ is a final state, so we aim to find the expected number of iterations needed to get there.
+
+Transition matrix for this Markov chain is $P = (p_i^j),$ where $i \in [0, k]$ is a line index and $j \in [0, k]$ is a column index. So $p_i^j$ is a probability to pass from state $i$ to state $j$ exactly in one iteration:
+
+\begin{align*}
+  p_i^j = \begin{cases}
+    0, \text{ if } i = k, j \ne k, \\
+    1, \text{ if } i = j = k, \\
+    \sum\limits_{m = 0}^{k - j} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\lambda}{n}\right)^{j - i + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - j + i - 2m}, \text{ if } j > i, \\
+      \sum\limits_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\lambda}{n}\right)^{i - j + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - i + j - 2m}, \text{ if } j < i, \\
+      1 - \sum\limits_{m = 0, m \ne i}^k p_i^m, \text{ if } j = i. \\
+  \end{cases}
+\end{align*}
+
+For $j > i$ this $p_i^j$ is a sum of the following probabilities:
+\begin{itemize}
+  \item probability to flip exactly $(j - i)$ zero-bits;
+  \item probability to flip exactly $(j - i + 1)$ zero-bits and one one-bit;
+  \item $\cdots$
+  \item probability to flip all the $(k - i)$ zero-bits and $(k - j)$ one-bits.
+\end{itemize}
+
+The same reasonings are applied in the case when $j < i$. To obtain $p_i^i$ we recall that $\sum\limits_{j = 0}^{k} p_i^j = 1$ for every $i.$
+
+Let us also notice that the first summand in the sum for $i \ne j$ is the most significant one: every next summand is less then previous one by factor at least $\frac{n}{k\lambda^2}$, so in some equations of this work we consider $p_i^j$ as its first summand multiplied by factor $(1 + o(1)).$
+
+By $\pi_i(t)$ we imply the probability that algorithm will be in state $i$ on the $t$-th iteration. Also we define $\pi(t)$ as a distribution over $k + 1$ states on the $t$-th iteration that is represented by a stochastic vector $(\pi_0(t), \pi_2(t), \dots, \pi_k(t)).$ Notice that $\pi(0) = (1, 0, \cdots, 0),$ although it does not affect the proof.
+
+Also let us introduce a matrix $R = (r_i^j)$, where $i, j \in [0, k]:$
+\begin{align*}
+  r_i^j = \begin{cases}
+    \frac{p_i^j}{1 - p_i^k}, \text{ if } j, i \ne k, \\
+    0, \text{ if } j = k \text{ OR } i = k, \\
+    1, \text{ it } i = j = k. \\
+  \end{cases}
+\end{align*}
+
+This is the matrix of transition probabilities on condition that algorithm does not reach the final state on the current iteration.
+
+By $\rho_i(t)$ we imply the conditional probability to be in state $i$ on iteration $t$, if the algorithm has not reached the final state before this iteration. Also we define $\rho(t)$ as a distribution over $k$ states on the $t$-th iteration that is represented by a stochastic vector $(\rho_0(t), \rho_1(t), \dots, \rho_{k - 1}(t), 0).$ Notice we always have $\rho_k(t) = 0.$
+
+By $p_{end}(X)$ we imply the probability that algorithm will reach the final state if the current distribution over the states of Markov chain is $X$:
+
+$$p_{end}(X) = \sum\limits_{i = 0}^k X_i p_i^k$$
+
+\section{Plan of the proof}
+
+First we will find a stationary conditional distribution over the states of the Markov chain. It is a distribution $\rho^*$ such that
+
+$$\rho(t) = \rho^* \Rightarrow \rho(t + 1) = \rho^*.$$
+
+Next step will be proving that the upper bound on runtime is $(1 + o(1)) / p_{end}^*.$ After that we will also prove that the lower bound on runtime is also $(1 + o(1)) / p_{end}^*.$
+
+Finally, we will find the value of $\lambda$ that minimizes the expected runtime.
+
+\section{Stationary distribution}
+
+Obviously, algorithm will almost surely reach the final state. So the stationary distribution over all the states of Markov chain will be $(0, \dots, 0, 1)$ and it does not help us to find the expected runtime. But we actually are interested, what will be the distribution over the states of Markov chain on the $t$-th iteration, if algorithm does not reach final state before this iteration. Notice that if we have a conditional distribution $\rho(t)$ on the iteration $t,$ then $\rho(t + 1) = \rho(t) R,$ where $R$ is conditional transition matrix.
+
+In this section we aim to find a stationary distribution $\rho^*$ such that $\rho^* = \rho^* \cdot R.$
+
+
+\begin{lemma}[Stationary distribution]
+$\forall i \in [0; k - 1] \rho_i^* = C (1 - p_i^k) \binom{n}{k - i},$ where $C = \left(\sum\limits_{i = 0}^{k - 1} (1 - p_i^k) \binom{n}{k - i}\right)^{-1}$ is a normalization constant. $\rho_k^* = 0.$
+\end{lemma}
+
+To prove this lemma we first need to prove an additional lemma.
+
+\begin{lemma}[There and back again]
+$p_i^j \binom{n}{k - i} = p_j^i \binom{n}{k - j}$
+\end{lemma}
+
+\begin{proof}
+For the case when $i = j$ this lemma is obvious.
+
+Consider the case when $j > i.$ Then:
+
+\begin{align*}
+  p_i^j \binom{n}{k - i} &= \sum\limits_{m = 0}^{k - j} \binom{n}{k - i} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\lambda}{n}\right)^{j - i + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - j + i - 2m} \\
+  &= \sum\limits_{m = 0}^{k - j} \binom{n}{k - j} \binom{k - j}{m} \binom{n - k + j}{j - i + m} \left(\frac{\lambda}{n}\right)^{j - i + 2m} \left(1 - \frac{\lambda}{n}\right)^{n - j + i - 2m} \\
+  &= p_j^i \binom{n}{k - j}.
+\end{align*}
+
+The case when $j < i$ can be proven by switching $i$ and $j$ in the previous case.
+\end{proof}
+
+\begin{proof}[Proof (Stationary distribution)]
+Let $\rho^*$ be $\left(\left(C (1 - p_i^k) \binom{n}{k - i}\right)_{i = 0}^{k - 1}, 0 \right)$.
+
+For some integer $i \in [0, k - 1]$ consider the $i$-th element of $\rho^* \cdot R$:
+\begin{align*}
+(\rho^* \cdot R)_i &= \sum\limits_{j = 0}^{k - 1} \rho_j^* \frac{p_j^i}{1 - p_j^k} = \sum\limits_{j = 0}^{k - 1} C \binom{n}{k - j} p_j^i \\
+&= \sum\limits_{j = 0}^{k - 1} C \binom{n}{k - i} p_i^j = C (1 - p_i^k) \binom{n}{k - i} \sum\limits_{j = 0}^{k - 1} \frac{p_i^j}{1 - p_i^k} \\
+&= C (1 - p_i^k) \binom{n}{k - i} = \rho_i^*.
+\end{align*}
+
+Also $(\rho^* \cdot R)_k = 0 = \rho_k^*.$
+
+So, we have $\rho^* \cdot R = \rho^*,$ thus $\rho^*$ is a conditional stationary distribution.
+\end{proof}
+
+For the found stationary distribution $\rho^*$ let us define $p_{end}^* = \sum\limits_{i = 0}^{k - 1} \rho_i^* p_i^k$ that is probability to reach final state in case when the distribution over the states is conditionally stationary.
+
+\section{Upper bound on runtime}
+
+In this section we will prove the upper bound on algorithm runtime of $1/p_{end}^*.$ To do it we first need to prove a pack of lemmas
+
+\begin{definition}
+We say that vector $X$ of length $(k + 1)$ \textbf{dominates} over vector $Y$ of length $(k + 1)$, if $\forall i \in [0, k]$ $X_i \ge Y_i.$ We write it as $X \ge Y.$
+\end{definition}
+
+\begin{lemma}\label{vector_domination}
+If $X \ge Y,$ then $X P \ge Y P.$
+\end{lemma}
+
+\begin{proof}
+  Recall that all $p_i^j \ge 0$ and consider $(X P)_i$ for some number $i:$
+  \begin{align*}
+    (X P)_i &= \sum\limits_{i = 0}^{k - 1} X_i p_i^j \ge \sum\limits_{i = 0}^{k - 1} Y_i p_i^j = (Y P)_i
+  \end{align*}
+
+  As soon as it holds for every $i \in [0, k],$ the lemma is proved.
+\end{proof}
+
+Form this lemma we have an obvious corollary:
+\begin{corollary}\label{P_t}
+If $X \ge Y,$ then $\forall t \in \mathbb{N}$ $X P^t \ge Y P^t.$
+\end{corollary}
+
+\begin{lemma}\label{pi_R}
+$\rho^* P^t = (1 - p_{end}^*)^t \rho^* + (0, \dots, 0, 1 - (1 - p_{end}^*)^t).$
+\end{lemma}
+\begin{proof}
+  We will use mathematical induction to prove this lemma. First, for $t = 0$ we have $\rho^* \dot I = \rho + (0, 0, \dots, 0),$ that is obviously true.
+
+  Next, consider $\rho^* P.$ The probability not to reach the final state is $(1 - p_{end}^*)$ and conditional probability $\rho_i^*$ for $i \ne k$ does not change after this operation, as it is the same as performing one iteration. So for $i \ne k$ it is true that $(\rho^* P)_i = (1 - p_{end}^*) \rho_i^*.$
+
+  Thus,
+  \begin{align*}
+    \rho^* P^t &= \rho^* P^{t - 1} P = (1 - p_{end}^*)^{t - 1} \rho^* P + (0, \dots, 0, 1 - (1 - p_{end})^{t - 1}) P \\
+    &= (1 - p_{end}^*)^t \rho^* + (0, \dots, 0, (1 - p_{end}^*)^{t - 1} p_{end}) + (0, \dots, 0, 1 - (1 - p_{end})^{t - 1}) \\
+    &= (1 - p_{end}^*)^t \rho^* + (0, \dots, 0, 1 - (1 - p_{end})^t).
+  \end{align*}
+\end{proof}
+
+\begin{theorem}\label{th_up}
+  The expected runtime of the $(1 + 1)-ES$ on the function $F(x)$ is not greater than $(1 + o(1))/p_{end}^*.$
+\end{theorem}
+
+\begin{proof}
+Consider the initial distribution over $k + 1$ states: $\pi(0) = (1, 0, \dots, 0).$
+Then $\pi(t) = \pi(0) P^t,$ and then the probability to reach the final state exactly on the $t$-th iteration is $p_{end}(\pi(t)) = \sum\limits_{i = 0}^{k - 1} p_i^k \pi_i(t).$
+
+Notice that:
+\begin{align*}
+\pi(0) &= (1, 0, \dots, 0) \le (1, \frac{\rho_1^*}{\rho_0^*}, \dots, \frac{\rho_k^*}{\rho_0^*}) = \frac{1}{\rho_0^*} \rho^*.
+\end{align*}
+
+Therefore, by Corollary~\ref{P_t} $\pi(t) = \pi(0) P^t \le \frac{1}{\rho_0^*} \rho^* P^t$, so $\pi_i(t) \le (1 - p_{end}^*)^t \rho_i^*.$ Using Lemma~\ref{pi_R} we can show that probability to reach the final state on iteration $t$ is:
+
+\begin{align*}
+p_{end}(\pi(t)) &= \sum\limits_{i = 0}^{k - 1} \pi_i(t) p_i^k \le \sum\limits_{i = 0}^{k - 1} \frac{1}{\rho_0^*}(1 - p_{end}^*)^t \rho_i^* p_i^k = \frac{1}{\rho_0^*} (1 - p_{end}^*)^t p_{end}^*.
+\end{align*}
+
+Next, consider the value of the expected runtime by the definition of the expectation:
+
+\begin{align*}
+  T = \sum\limits_{t = 1}^{+\infty} t \cdot p_{end}(\pi(t)) \le \sum\sum\limits_{t = 1}^{+\infty} t \frac{1}{\rho_0^*} (1 - p_{end}^*)^t p_{end}^* = \frac{1}{\rho_0^* p_{end}^*}
+\end{align*}
+
+Finally, consider $\rho_0^*:$
+
+\begin{align*}
+  \rho_0^* &= \frac{(1 - p_0^k)\binom{n}{k}}{\sum\limits_{i = 0}^{k - 1}(1 - p_i^k)\binom{n}{k - i}} = (1 + o(1)) \frac{\binom{n}{k}}{\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i}}
+  = 1 + o(1)
+\end{align*}
+
+Consequently, $T \le \frac{1}{\rho_0^* p_{end}^*} = \frac{1 + o(1)}{p_{end}^*}$
+\end{proof}
+
+\section{Lower bound on runtime}
+
+\begin{theorem}\label{th_lo}
+  The expected runtime of the $(1 + 1)-ES$ on function $F(x)$ is not greater than $\frac{1 + o(1)}{p_{end}^*}.$
+\end{theorem}
+
+\begin{proof}
+Let us define $q$ as the smallest probability to get to state $0$ for every $i \in [1, k - 1]:$
+
+$$q = \min\limits_{i \in [1, k - 1]} p_i^0.$$
+
+Notice that:
+\begin{align*}
+p_i^0 = (1 + o(1))\binom{n - k + i}{i}\left(\frac{\lambda}{n}\right)^i e^{-\lambda}= (1 + o(1))\frac{\lambda^i}{i!}e^{-\lambda} = \Theta(1).
+\end{align*}
+
+Thus, $q = \Theta(1).$
+
+For every state $i$ we also define $T_i$ as a runtime of the algorithm, if it starts in state $i$.
+
+If algorithm is in any state $i \ne 0, k$, then it has a probability at least $q$ to go either to state $0$, or to the final state. If it goes to another state $i \ne 0, k,$ then situation does not change.
+
+Consequently, every $T_i$ is not greater then the expected runtime to go state $0$ or to state $k$ plus runtime to get to the final state in case algorithm went to state $0:$
+$$T_i \le \frac{1}{q} + T_0.$$
+
+If the initial distribution over the states of Markov chain is $\rho^*,$ then the expected runtime of the algorithm is exactly $1/p_{end}^*.$ At the same time we can say that in this case the expected runtime is:
+
+\begin{align*}
+  \frac{1}{p_{end}^*} = E[T] &= \sum\limits_{i = 0}^{k - 1} \rho_i^* T_i \le \rho_0^* T_0 + \sum\limits_{i = 1}^{k - 1}\rho_i^*(\frac{1}{q} + T_0) \\
+  &= T_0 + \frac{1 - \rho_0^*}{q}. = T_0 + o(1)
+\end{align*}
+
+The last transition is justified by the fact that $q = \Theta(1)$ and $\rho_0^* = 1 + o(1).$
+
+So we got that $T_0 \ge \frac{1}{p_{end}^*} + o(1)$
+that proves the theorem.
+\end{proof}
+
+Theorem~\ref{th_up} together with Theorem~\ref{th_lo} give us the main result of this paper: the expected runtime $T = \frac{1 + o(1)}{p_{end}^*}.$
+
+\section{Optimal value of $\lambda$}
+
+The optimal value of $\lambda$ must maximize $p_{end}^*$. Consider $p_{end}^*:$
+
+\begin{align*}
+p_{end}^* &= C\sum\limits_{i = 0}^{k - 1} (1 - p_i^k) \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}  \left(1 - \frac{\lambda}{n} \right)^{n - k + i} \\
+&= (1 + o(1))Ce^{-\lambda}\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i}.
+\end{align*}
+
+It is easy to see that for $\lambda = 0$ and for $\lambda \to +\infty$ $p_{end}^*(\lambda) = 0$. So as long as $p_{end}^*(\lambda)$ is a continuous function, we aim to find zeros of its derivative. As we need to find \textit{asymptotically optimal} value for $\lambda$, then it will be easier to consider approximate value of $p_{end}^*:$
+
+\begin{align*}
+ p_{end}^*  \approx p_a &= Ce^{-\lambda}\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left( \frac{\lambda}{n} \right)^{k - i} \\
+                        &= Ce^{-\lambda}\sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}
+\end{align*}
+
+Its derivative:
+
+\begin{align*}
+(p_a)' &= Ce^{-\lambda}(\sum\limits_{i = 1}^{k} \binom{n}{i} \frac{i\lambda^{i - 1}}{n^i} - \sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}) \\
+       &= Ce^{-\lambda}(\sum\limits_{i = 0}^{k - 1} \binom{n}{i + 1} \frac{(i + 1)\lambda^i}{n^{i + 1}} - \sum\limits_{i = 1}^{k} \binom{n}{i} \left( \frac{\lambda}{n} \right)^{i}) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \left(\binom{n}{i + 1} \frac{(i + 1)\lambda^{i}}{n^{i + 1}} - \binom{n}{i} \frac{\lambda^i}{n^i} \right) - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \left(\binom{n}{i} \frac{i + 1}{n} - \binom{n}{i} \right) - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
+       &= Ce^{-\lambda}\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} - \binom{n}{k} \frac{\lambda^k}{n^k} \right) \\
+\end{align*}
+
+$(p_a)' = 0$ only if $\left(1 - \sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} - \binom{n}{k} \frac{\lambda^k}{n^k} \right) = 0$. Let us consider the last equation more precisely.
+
+For all $i \in [1; k - 1]:$
+\begin{align*}
+  \binom{n - 1}{i - 1}\frac{\lambda^i}{n^i} = \frac{\lambda^i}{(i - 1)!} \frac{(n - 1)\cdot(n - 2)\cdots(n - i + 1)}{n^i} = \frac{\lambda^i}{(i - 1)!} (1/n + o(1/n))
+\end{align*}
+
+Thus, $\sum\limits_{i = 1}^{k - 1} \frac{\lambda^i}{n^i} \binom{n - 1}{i - 1} = o(1).$
+
+We can say in the same way that $\binom{n}{k} \frac{\lambda^k}{n^k} = \frac{\lambda^k}{k!} (1 + o(1))$. So we have a simplified derivative of $p_a:$
+
+\begin{align*}
+(p_a)' = 1 - \frac{\lambda^k}{k!} + o(1).
+\end{align*}
+
+It means that if $\lambda \ne \sqrt[k]{k!}$, then for some large $n$ there is a neighbourhood of this value that does not contain zero of the derivative. At the same time if $\lambda = \sqrt[k]{k!}$, then $\forall \varepsilon > 0$ $\exists N$ $\forall n > N$ $|(p_a)'| < \varepsilon$. So, the only value of $\lambda$ that can be considered as asymptotically optimal is $\lambda = \sqrt[k]{k!}$.
+
+
+\end{document}
