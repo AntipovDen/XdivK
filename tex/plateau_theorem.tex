@@ -1,0 +1,113 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\usepackage{tabularx}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+\section{Notation}
+  \begin{definition}
+    Let $f$ be a function over the space $S$. We call $R \subset S$ a plateau of $f$, if for every $x, y \in R$ we have $f(x) = f(y).$
+  \end{definition}
+
+  In this definition we do not depend on measure defined over the space $S$, so the plateau must not be a set of "neighbour" elements.
+
+  Here we consider $(1 + 1)$-EA that optimizes some function $f$ over the space $S$. Pseudocode of this algorithm is shown in Algorithm~\ref{pseudo}. We do not specify, what mutation operator we use.
+
+  Let $R \subset S$ be a plateau of function $f$ and let $|R| = n$ be finite. Then we can index all the elements of the plateau with integer numbers from $[0..n-1].$ By $R_i$ we imply the $i$-th element of the plateau.
+
+  \begin{definition}
+    We call $p_i^j$ the probability that $\textsc{Mutate}(R_i) = R_j$ and we call $p_i^n$ the probability that $\textsc{Mutate}(R_i) \not\in R.$
+  \end{definition}
+
+  By $\pi_i(t)$ we imply the probability that algorithm is in the $i$-th element of the plateau on the $t$-th iteration after entering this plateau. By $\rho_i(t)$ we imply the probability that algorithm is in the $i$-th element of the plateau on the $t$-th iteration after entering this plateau on condition that it has not left the plateau before $t$-th iteration.
+
+  \begin{algorithm}[!t]
+  \begin{center}
+      \begin{algorithmic}[1]
+          \State {$x \gets$ random element of $S$}
+          \State {$\textsc{Mutate}(x) \gets$ mutation operator}
+          \While {$f(x) < \max\limits_{s \in S} f(s)$}
+              \State{$y \gets \textsc{Mutate}(x)$}
+              \If {$f(y) \ge f(x)$}
+                  \State {$x$ $\gets$ $y$}
+              \EndIf
+          \EndWhile
+      \end{algorithmic}
+      \caption{Pseudocode of $(1 + 1)$-EA}
+      \label{pseudo}
+  \end{center}
+  \end{algorithm}
+
+
+\section{Plateau Theorem}
+  \begin{theorem}
+    Assume that $p_i^j = p_j^i$ for every $i, j \in [0..n-1]$, and we have $\pi_i(0) = c(1 - p_i^n)$ for every $i \in [0..n - 1]$, where $c$ is a normalization constant. Then the expected number of iterations that $(1 + 1)$-EA will spend on the plateau $R$ is
+    $$T = \frac{\sum\limits_{i = 0}^{n - 1} (1 - p_i^n)}{\sum\limits_{i = 0}^{n - 1} p_i^n (1 - p_i^n)}.$$
+  \end{theorem}
+
+  \textbf{NB:} We used this theorem in our prevous work, but we sligthly changed it: we grouped elements of the plateau by similar $p_i^n.$
+
+  \begin{proof}
+    First, we show that if $\rho_i(t) = c(1 - p_i^n)$ for every $i$, then $\rho_i(t + 1) = \rho_i(t)$ for every $i$.
+    Notice that conditional probability $\Pr[\textsc{Mutate}(R_i)=R_j | \textsc{Mutate}(R_i) \in R] = \frac{p_i^j}{1 - p_i^n}.$
+    \begin{align*}
+      \rho_i(t + 1) &= \sum\limits_{j = 0}^{n - 1} \rho_j(t) \frac{p_j^i}{1 - p_j^n} = \sum\limits_{j = 0}^{n - 1} cp_j^i = \sum\limits_{j = 0}^{n - 1} cp_i^j = c(1 - p_i^n) = \rho_i(t).
+    \end{align*}
+
+    Next, notice that the probability to escape the plateau on $t$-th itatration on condition that the algorithm does not escape the palteau before is $$p_{end}^* = \sum\limits_{i = 0}^{n - 1} \rho_i(t) p_i^n$$ and it does not change through iterations, as long as every $\rho_i(t)$ does not change. So we can write down the following equality for the runtime:
+    \begin{align*}
+      T &= 1 + (1 - p_{end}^*)T \\
+      p_{end^*}T &= 1 \\
+      T &= 1 / p_{end}^*.
+    \end{align*}
+
+    And if we write down, what $p_{end}^*$ really is:
+
+    \begin{align*}
+      p_{end}^* &= \sum\limits_{i = 0}^{n - 1} \rho_i(t) p_i^n = \sum\limits_{i = 0}^{n - 1} c(1 - p_i^n)p_i^n
+    \end{align*}
+
+    The last step is to recall that $c = \left(\sum\limits_{i = 0}^{n - 1} (1 - p_i^n)\right)^{-1}.$
+
+  \end{proof}
+
+\section{Conclusion}
+
+This theorem is too specific for the algorithm we use and for the initial distribution over the state space. However, I am sure that there is a way to bound the time of convergence of the distribution over the elements of the plateau to the stationary distribution with, but I still have not found it.
+
+\end{document}
