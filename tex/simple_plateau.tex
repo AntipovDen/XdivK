@@ -1,0 +1,135 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\usepackage{tabularx}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+
+\section{Drift Analysis on a Simple Plateau}
+Consider the following problem. We have some integer number $x$ that is initially zero. Then we iterativly either increase it by one or decrease it by one randomly with equal probabilities. That means that if we have number $x_t$ on iteration $t$, then we have $\Pr[x_{t + 1} = x_t + 1] = \Pr[x_{t + 1} = x_t - 1] = \frac{1}{2}.$
+
+The question is how long will it take $x$ to become grater than some number $n$ by its absolute value.
+
+To answer this question consider all the integer numbers from $[-(n + 1)..(n + 1)]$ as states of some Markov chain. Transition probabilities are folowing:
+
+\begin{align*}
+  \Pr[i \to j] =
+  \begin{cases}
+    \frac{1}{2}, \text{ if } |i - j| = 1 \text{ and } |i| \ne n + 1, \\
+    0, \text{ otherwise.}\\
+  \end{cases}
+\end{align*}
+
+So we wonder, how much time will it take to reach either state $(n + 1)$ or state $-(n + 1)$ starting from state $0.$ To find it out let us use additive drift theorem. Let us define the following potential function for every state $i$ of the markov chain:
+
+\begin{align*}
+  \Phi(i) =
+  \begin{cases}
+    \sum\limits_{j = |i|}^n (2j + 1), \text{ if } |i| \ne n + 1, \\
+    0, \text{ othewise.}\\
+  \end{cases}
+\end{align*}
+
+Notice that $\Phi(|i|) - \Phi(|i| + 1) = 2|i| + 1$ for all $i \in [-n..n].$
+The expected difference of the potential function, if $x = i \ne 0,$ is
+
+\begin{align*}
+  \delta = E(\Delta\Phi) = \frac{1}{2} (2|i| + 1) - \frac{1}{2}(2(|i| - 1) + 1) = 1.
+\end{align*}
+
+If $i = 0:$
+
+
+\begin{align*}
+  \delta = E(\Delta\Phi) = \frac{1}{2} 1 + \frac{1}{2} 1 = 1.
+\end{align*}
+
+Also
+\begin{align*}
+  \max \Phi(i) = \Phi(0) = \sum\limits_{j = 0}^n (2j + 1) = (n + 1) + 2 \frac{n}{2} (n + 1) = (n + 1)^2.
+\end{align*}
+
+It gives us the exact expected runtime $T = \frac{\max\Phi(i)}{\delta} = (n + 1)^2.$
+
+\section{Applying the Plateau Theorem}
+
+If we try to apply a plateau theorem, then we should consider states from $[-n..n]$ as a plateau and getting to state $(n + 1)$ or state $-(n + 1)$ as an escape from the plateau. In this case we discover that the stationary conditional disrtibution over the states is following:
+
+\begin{align*}
+  p_i^* =
+  \begin{cases}
+    \frac{1}{n - 1}, \text{ if } i \ne n, \\
+    \frac{1}{2(n - 1)}, \text{ if } i = n. \\
+  \end{cases}
+\end{align*}
+
+Let us check it only for non-negative $i$ to simplify notation.
+\begin{itemize}
+  \item If $i < (n - 1),$ then $p_i(t + 1) = \frac{1}{2} p_{i - 1}(t) + \frac{1}{2} p_{i + 1}(t) = \frac{1}{2}\frac{1}{n - 1} + \frac{1}{2}\frac{1}{n - 1} = p_i(t).$
+  \item If $i = (n - 1),$ then $p_i(t + 1) = \frac{1}{2} p_{i - 1}(t) + 1 p_{i + 1}(t) = \frac{1}{2}\frac{1}{n - 1} + \frac{1}{2(n - 1)} = p_i(t).$
+  \item If $i = n,$ then $p_i(t + 1) = \frac{1}{2} p_{i - 1}(t)= \frac{1}{2}\frac{1}{n - 1} = p_i(t).$
+\end{itemize}
+
+Now let us define $p_i^{n + 1}$ as the probability to escape the plateau from state~$i$. $p_n^{n + 1} = \frac{1}{2}$ and for any other state it is zero. Summing up all that we said above gives us the following result: if initial distribution is the stationary one, then the expected number of iterations before escaping the plateau is
+
+\begin{align*}
+  T = \frac{\sum\limits_{i = -n}^n (1 - p_i^{n + 1})}{\sum\limits_{i = -n}^n p_i^{n + 1}(1 - p_i^{n + 1})} = \frac{2n + 1}{1/2} = 4n + 2.
+\end{align*}
+
+We have got linear runtime that is totally contradicts the result shown into the previous section. What is the nature of this contradiction?
+
+Using the plateau theorem we assumed that we have at least $\frac{1}{2(n - 1)}$ probability to be in one of the border states: $n$ or $-n,$ and later exactly this probability played role in the total expected runtime. But how much iterations do we need so that probability to be in the border states is $\Omega(1/n)?$
+
+To answer this question let us notice that $x$ is a martingale, as long as $E(x_{t + 1}|x_t) = \frac{1}{2}(x_t + 1) + \frac{1}{2}(x_t - 1) = x_t.$
+
+So we can use Azuma–Hoeffding inequality to bound the probability that after $k$ iterations $|x_k| = |x_k - x_0| \ge n:$
+
+\begin{align*}
+  \Pr[|x_k| \ge n] \le 2e^{-\frac{n^2}{2k}}.
+\end{align*}
+
+If we have $k = o\left(\frac{n^2}{\ln(n)}\right),$ then this probability is:
+
+\begin{align*}
+  \Pr[|x_k| \ge n] \le 2e^{-\frac{n^2}{o\left(\frac{n^2}{\ln n}\right)}} = 2e^{-\omega(\ln(n))} = o(1/n).
+\end{align*}
+
+\textbf{NB:} \textit{equalities $\frac{n^2}{o\left(\frac{n^2}{\ln n}\right)} = \omega(\ln(n))$ and $2e^{-\omega(\ln(n))} = o(1/n)$ can be justified by definitions of $o()$ and $\omega()$.}
+
+So we need at least $\Omega\left(\frac{n^2}{\log(n)}\right)$ iterations to reach the probability to escape the plateau at least $\Omega(1/n).$ And that is why we can not apply our plateau theorem to this toy problem.
+\end{document}

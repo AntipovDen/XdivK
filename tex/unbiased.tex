@@ -1,0 +1,106 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\usepackage{tabularx}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+Consider the following function $F(x)$ that is defined over the space of bit-vectors of the length $n$:
+
+\begin{align*}
+  F(x) =
+  \begin{cases}
+    \OM(x), \text{ if } \OM(x) \le n - k \\
+    n - k, \text{ if } n - k < \OM(x) < n \\
+    n, \text{ if } \OM(x) = n \\
+  \end{cases}
+\end{align*}
+
+Also consider an unbiased evolutionary algorithm described in Algorithm~\ref{algorithm} that finds the maximum value of function $F(x)$.
+
+\begin{algorithm}[!t]
+\begin{center}
+    \begin{algorithmic}[1]
+        \State {$x \gets$ random element of $S$}
+        \State {$D \gets$ some distribution over non-negative integer numbers}
+        \While {$F(x) < n$}
+            \State{$\alpha \gets$ random number according to $D$}
+            \State{$y \gets x$ with exactly $\alpha$ uniformly ranadomly chosen bits flipped}
+            \If {$f(y) \ge f(x)$}
+                \State {$x$ $\gets$ $y$}
+            \EndIf
+        \EndWhile
+    \end{algorithmic}
+    \caption{Pseudocode of $(1 + 1)$-EA}
+    \label{algorithm}
+\end{center}
+\end{algorithm}
+
+Let $\rho(x, y)$ be the Hamming distance between $x$ and $y,$ that is the number of bits that differ in these two individuals. Let $p_x^y$ be the probability that $x$ will mutate to $y$. This mutation happens if and only if the two following events occure on one iteration of the algorithm:
+
+\begin{enumerate}
+  \item The algorithm chooses $\alpha = \rho(x, y).$
+  \item The algorithm chooses bits that differ in $x$ and $y$ to flip.
+\end{enumerate}
+
+$\Pr[\alpha = \rho(x, y)]$ depends on distribution $D$. The probability of the second event is the probability to choose one exact combination of bits out of $\binom{n}{\rho(x, y)}$ combinations. It means that $p_x^y = \Pr[\alpha = \rho(x, y)]\binom{n}{\rho(x, y)}^{-1}$. As long as Hamming distance is symmetric, it is easy to see that $p_x^y = p_y^x$ for all $x$ and $y$
+
+Let us also define $p_x$ as a probability that $x$ mutates to the global optima -- $x_{opt}$.
+
+Now let us find the runtime of passing the plateau of the considered function. As long as conditions of the plateau theorem are satisfied, then if the initial distribution over the plateau is the stationary conditional distribution, then the runtime will be
+
+\begin{align*}
+  T = \frac{\sum\limits_{x \in \text{Plateau}}(1 - p_x)}{\sum\limits_{x \in \text{Plateau}}p_x(1 - p_x)}.
+\end{align*}
+
+As long as all $p_x \le \binom{n}{1}^{-1} = o(1)$ for all $x \ne x_{opt},$ then
+
+\begin{align*}
+  T = \frac{\sum\limits_{x \in \text{Plateau}}1}{\sum\limits_{x \in \text{Plateau}}p_x}(1 + o(1)) =
+  \frac{|\{x: x \in \text{Plateau}\}|}{\sum\limits_{i = 1}^k \sum\limits_{x: \rho(x, x_{opt}) = i} p_x}(1 + o(1)).
+\end{align*}
+
+The size of the plateau $|\{x: x \in \text{Plateau}\}| = \sum\limits_{i = 1}^{k} \binom{n}{i} = \binom{n}{k} (1 + o(1)).$
+
+Consider the denominator:
+\begin{align*}
+  \sum\limits_{i = 1}^k\sum\limits_{x: \rho(x, x_{opt}) = i} p_x &= \sum\limits_{i = 1}^k\sum\limits_{x: \rho(x, x_{opt}) = i} \Pr[\alpha = i]\binom{n}{i}^{-1} = \sum\limits_{i = 1}^k \Pr[\alpha = i].
+\end{align*}
+
+So if we have such a distribution $D$ that $\Pr[\alpha \in  [1..k]] = q$, then $T = \binom{n}{k} q^{-1} (1 + o(1))$
+
+\end{document}
