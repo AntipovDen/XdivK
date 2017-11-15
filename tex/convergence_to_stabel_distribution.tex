@@ -1,0 +1,125 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\usepackage{tabularx}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+
+\section{Preliminaries and Notation}
+
+We consider simple $(1 + 1)$-EA that optimizes a \OM function but with a plateau of radius $k$ around the optimum. $(1 + 1)$-EA uses not standard mutation rate, but mutation rate $\alpha$ that means that on each iteration it flips each bit of the individual with probability $\frac{\alpha}{n}$ where $n$ is the size of the individual.
+
+As long as time for reaching the plateau is $O(n\log n)$ and the time of passing the plateau is $\Omega(n^2)$, we only consider the runtime of the algorithm after it has reached the plateau.
+
+For precise runtime analysis of the algorithm on the plateau we can consider the plateau in two different ways. The first way is to consider it as a Markov's chain that contains $N = \sum\limits_{i = 0}^{k - 1} \binom{n}{k - 1}$ states, and each state represents one individual on the plateau. Also there is a final state that represents an optimum. Transition probability between two individuals depend only on the distance between these individuals. Transition matrix $P_i$ for such chain is large and is hard do describe precisely. But if we do not consider the final state, then transition matrix is symmetric: to mutate from individual $a$ to individual $b$ we need to flip exactly the same set of bits as if we need to mutate frm individual $b$ to individual $a$. Symetricity of this matrix will give us some simplifications in our analysis. For example we will use the fact that eigenvectors of such matrix are ortogonal. We will call this chain \textit{the individuals' chain}. Aslo we will call the space of real vectors of size $N$ \textit{the individuals' space}.
+
+Another Markov's chain that can represent the plateau is a chain that contains exactly $k$ states, and $i$-th state represents all the individuals that have $n - k + i$ one-bits. Also it has a final state to represent optimum. Transition matrix $P_\ell$ of this chain is easy to descrbe, however it is not symmetric, that deprives us the ability to use the properties of symmetric matrices. We call such chain \textit{the layers' chain} and we call the space of real vectors of length $k$ \textit{the layers' space}.
+
+There is a natural mapping from the layers space to the individuals space. Every vector $x = (x_0, \dots, x_{k - 1})$ can be mapped to vector $\phi(x) = (y_0, \dots, y_{N - 1}),$ where $y_i = x_j / \binom{n}{k - j}, $ if $i$-th individual is in $j$-th layer. This mapping has several good properties:
+
+\begin{enumerate}
+  \item This mapping is linear: $\phi(\alpha x_1 + \beta x_2) = \alpha \phi(x_1) + \beta \phi(x_2),$ where $\alpha, \beta \in \mathbb{R}.$ This property follows right fro the definition of $\phi.$
+  \item $\phi(x P_i) = \phi(x) P_\ell.$ To understand this property, consider any vector from each space as a distribution of some mass over the states of the corresponding chain. In this case application of transition matrix to the vector is the same as performing this transition of the mass inside the Markov's chain. And as long as both Markov's chains represent the same process, then transition will be the same, and we 
+\end{enumerate}
+
+\section{Initial Distribution}
+
+If we get to the plateau from the individual with $(n - k - 1)$ one-bits\dots
+
+\section{Spectrum of the Transition Matrix}
+
+Consider the matrix $P$ that is the transition matrix for the layers' chain. We can write down its elements $p_i^j$ in the following way:
+
+\begin{align*}
+  p_i^j = \begin{cases}
+    0, \text{ if } i = k, j \ne k, \\
+    1, \text{ if } i = j = k, \\
+    \sum\limits_{m = 0}^{k - j} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\alpha}{n}\right)^{j - i + 2m} \left(1 - \frac{\alpha}{n}\right)^{n - j + i - 2m}, \text{ if } j > i, \\
+      \sum\limits_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\alpha}{n}\right)^{i - j + 2m} \left(1 - \frac{\alpha}{n}\right)^{n - i + j - 2m}, \text{ if } j < i, \\
+      1 - \sum\limits_{m = 0, m \ne i}^k p_i^m, \text{ if } j = i. \\
+  \end{cases}
+\end{align*}
+
+Let us consider only the part of this matrix without the final state. So we have only $p_i^j,$ where $i, j \in [0..k-1].$
+
+Let us also notice the magnitude of each element of the matrix. If $j < i,$ then $p_i^j$ is some constant that is about $\binom{n - k + i}{i - j}\left(\frac{\alpha}{n}\right)^{i - j}e^{-\alpha} \approx \frac{\alpha^{i - j}}{(i - j)!} e^{-\alpha}.$ If $j > i,$ then $p_i^j$ is very small, it can be estimated as $\binom{k - i}{j - i}\left(\frac{\alpha}{n}\right)^{j - i}e^{-\alpha} = \Theta(n^{-(j - i)}).$
+
+The most important thing is magnitude of the $p_i^i.$ As long as $p_i^i = 1 - \sum\limits_{j \ne i} p_i^j$ and as we know the magnitues of all the $p_i^j$, then $p_i^i = 1 - \sum\limits_{j = 1}^{i} \frac{\alpha^j}{j!}e^{-\alpha} + o(1).$  It is a constant that is not grater than $1$ (this bound is almost hit for $i = 0$) and not less then $e^{-\alpha}$ (this bound is almost hit for $i = k - 1$ for large values of $k$).
+
+Now to find the spectrum of this matrix we should find all the roots of its characteristic polynomial $\chi(\lambda)$ which is determinant of the matrix $(P - \lambda I):$
+\begin{align*}
+  \chi(\lambda) = \det (P - \lambda I) = \sum\limits_{\sigma \in S_n} \text{sgn}(\sigma) \prod\limits_{i = 0}^{k - 1}(P - \lambda I)_{i, \sigma{i}},
+\end{align*}
+where $S_n$ is a set of all the permutations of the set $[0..k - 1].$ Notice that for all permutations, except $\sigma_0 = (0, 1, \dots, k - 1)$ production under the sum contains at least one $(P - \lambda I)_{i, j},$ where $j > i$. And this element $(P - \lambda I)_{i, j} = p_i^j = o(1)$. Other elements of the production are either $p_i^j$ or $(p_i^i - \lambda),$ but in bith cases their absolute value can be bounded above by one. Thus, characteristical polnomial can be written in the following way:
+
+\begin{align*}
+  \chi(\lambda) = \prod\limits_{i = 0}^{k - 1} (p_i^i - \lambda) + o(1).
+\end{align*}
+
+As long as all the coefficients of this polynomial are almost constants over $n$, then we can consider it as slight movement of the polynomial along the vertical axis. Therefore, its roots are inside some neighbourhood of the roots of $\prod\limits_{i = 0}^{k - 1} (p_i^i - \lambda).$ And radius of these neighbourhoods converges to zero as $n$ tends to infinity.
+
+So we can say that the spectrum of matrix $P$ is $\{p_i^i \pm o(1)\}_{i = 0}^{k - 1}.$ Notice the following facts about this spectrum:
+\begin{itemize}
+\item All the elements of the spectrum are positive.
+\item The minimal element of the spectrum is not less than $1/e - o(1).$
+\item The gratest element of the spectrum is $1 - o(1).$
+\item The second greatest element of the spectrum is $p_1^1 (1 + o(1)) = 1 - 1/e + o(1).$
+\end{itemize}
+
+\section{Stationary Conditional Distribution}
+
+Perron-Frobenius theorem~\cite{} states that for positive matrices the greatest eigenvalue has only one-dimensional eigenspace. Also this theorem claims that eigenvector for the greatest eigenvalue has all the comonents with the same sign and it does not have any zero component. Let us define $\pi^*$ as such an eigenvector for matrix $P.$ Aslo let us define $u$ as a distribution that is uniform over all the individuals over the plateau. It means that each level has a probability that is propotional to the size of the level:
+
+\begin{align*}
+  u_i = \binom{n}{k - i} / \sum\limits_{j = 0}^{k - 1} \binom{n}{k - j}.
+\end{align*}
+
+Let $e^i$ be the $i$-th eigenvector of matrix $P$ that correspond to the $i$-th eigenvalue $\lambda_i$ that are sorted in descending order. As we have said above, $e^0 = \pi^*.$ Let all $e^i$ be normilized in such way that $\sum\limits_{j = 0}^{k - 1} |e_j^i| = 1.$
+
+Set of $\{e^i\}_{i = 0}^{k - 1}$ form the basis of the $\mathbb{R}^k.$ It means that there exists the only one set of constants constants $(c_0, c_1, \dots, c_{k - 1})$ such that $u = \sum\limits_{i = 0}^{k - 1} c_i e^i.$
+
+\begin{lemma}
+$|c_i| \le 1$ for every $i \in [0..k - 1].$
+\end{lemma}
+
+\begin{proof}
+Every eigenvector in the space of distributions over layers has a corresponding vector in the space of distributins over individuals.
+\end{proof}
+
+
+\end{document}

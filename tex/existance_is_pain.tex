@@ -1,0 +1,64 @@
+\documentclass{article}
+
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{amsfonts}
+
+\usepackage{flushend}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{url}
+\usepackage[table]{xcolor}
+\usepackage{xspace}
+\usepackage[T2A]{fontenc}
+
+\usepackage{algorithm}
+\usepackage[english]{babel}
+
+\usepackage[utf8]{inputenc}
+\usepackage[backend=bibtex]{biblatex}
+
+\usepackage{tabularx}
+
+\newcommand{\OM}{\textsc{OneMax}\xspace}
+ \newcommand{\J}{\textsc{Jump}\xspace}
+\newcommand{\LB}{\textsc{LeftBridge}\xspace}
+\newcommand{\RB}{\textsc{RightBridge}\xspace}
+\newcommand{\EARL}{\textsc{EA+RL}\xspace}
+\newcommand{\RLS}{\textsc{RLS}\xspace}
+\newcommand{\OMZM}{\textsc{OneMax+ZeroMax}\xspace}
+\newcommand{\XdK}{\textsc{XdivK}\xspace}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+\addbibresource{bibliography.bib}
+\allowdisplaybreaks
+
+\begin{document}
+
+\section{Why I made a mistake}
+
+My mistake tooke place when I assumed that to find the distribution over the individuals on the plateau after $t$ iterations we can just consider the Markov's chain that represents the plateau and cut all the transitions that go out from plateau to the final state (that represents an escape from the plateau) with normalisation of all other transition probabilities so that sum of all outgoing probabilities from each state was equal to $1.$ And this was the wrong way of normalisation, as we need to normalize the distribution over the states by the same factor: we should divide each transition probability by factor $(1 - p_{end}(t))$ that is a probability mass that stays on the plateau after an iteration. Notice that it could be different on different iterations, as $p_{end}(t)$ may be variable.
+
+\section{What we can do}
+
+In perfect world we would like to find such a distribution that for each element of the plateau the probability decreases by factor $q(t)$ that is the same for all states on the plateau. It easy to show that if there is such distribution, than $q(t)$ does not depend on $t$ and is equal to $(1 - p_{end}(\pi)),$ where $p_{end}(\pi))$ is the probability to leave the plateau in case we have such distribution. Finding this distribution could let us use the methods we used in the original problem with bouding one distribution by another one.
+
+Thus we need such distribution over the plateau $\pi = (\pi_0, \pi_1, ... \pi_{k - 1})$ such that $\pi P = (1 - p_{end}(\pi)) \pi,$ where $P$ is the transition matrix of the original Markov's chain. This implies that $(1 - p_{end}(\pi))$ is an eigenvalue of $P$ and $\pi$ is a corresponding eigenvector. As long as $p_{end}(\pi)$ depends on $\pi,$ we can not surely say that $\pi$ exists.
+
+More precisely, we need $\pi$ such that:
+
+$$\pi_i = \frac{\sum\limits_{j = 0}^{k - 1} \pi_j p_j^i}{1 - \sum\limits_{j = 0}^{k - 1} \pi_j p_j^k} = \frac{\sum\limits_{j = 0}^{k - 1} \pi_j p_i^j}{\sum\limits_{j = 0}^{k - 1} \pi_j (1 - p_j^k)}.$$
+this may be considered as the ratio of the expected outgoing probability for the state $i$ to the expected probability not to leave the plateau according to distribution $\pi.$
+
+\section{Toy problem}
+
+For our toy problem (if we consider chain of length $(2n + 1)$) such a distribution is thought to exist and to be something like $\sim \frac{3(n^2 - d^2)}{4n^3},$ where $d$ is the distance from the center of the chain. However, this thoughts are only based on experimental results.
+
+Another fact that I noticed is that sometimes distribution does not converge at all. For example, if we have initial distribution such that we almost always start in the central state of the chain, then after even number of iterations we have zero probability to stay in any state on odd distance from the center and vice versa. However, even in this case it is likely to be true that the mean probability to be in the state $s$ over $t$ iterations converges to something like the distribution mentioned above with $t \to +\infty.$
+
+\end{document}
