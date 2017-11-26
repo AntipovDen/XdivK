@@ -44,34 +44,34 @@
 
 We consider simple $(1 + 1)$-EA that optimizes a \OM function but with a plateau of radius $k$ around the optimum. $(1 + 1)$-EA uses not standard mutation rate, but mutation rate $\alpha$ that means that on each iteration it flips each bit of the individual with probability $\frac{\alpha}{n}$ where $n$ is the size of the individual.
 
-As long as time for reaching the plateau is $O(n\log n)$ and the time of passing the plateau is $\Omega(n^2)$, we only consider the runtime of the algorithm after it has reached the plateau.
+As long as time for reaching the plateau is $O(n\log n)$ and the time of passing the plateau as it is shown in this paper is $\Omega(n^k)$, we only consider the runtime of the algorithm after it has reached the plateau.
 
-For precise runtime analysis of the algorithm on the plateau we can consider the plateau in two different ways. The first way is to consider it as a Markov's chain that contains $N = \sum\limits_{i = 0}^{k - 1} \binom{n}{k - 1}$ states, and each state represents one individual on the plateau. Also there is a final state that represents an optimum. Transition probability between two individuals depend only on the distance between these individuals. Transition matrix $P_i$ for such chain is large and is hard do describe precisely. But if we do not consider the final state, then transition matrix is symmetric: to mutate from individual $a$ to individual $b$ we need to flip exactly the same set of bits as if we need to mutate frm individual $b$ to individual $a$. Symetricity of this matrix will give us some simplifications in our analysis. For example we will use the fact that eigenvectors of such matrix are ortogonal. We will call this chain \textit{the individuals' chain}. Aslo we will call the space of real vectors of size $N$ \textit{the individuals' space}.
+For precise runtime analysis of the algorithm on the plateau we can consider the plateau in two different ways. The first way is to consider it as a Markov's chain that contains $N = \sum\limits_{i = 0}^{k - 1} \binom{n}{k - 1}$ states, and each state represents one individual on the plateau. Also there is a final state that represents an optimum. Transition probability between two individuals depend only on the Hamming distance between these individuals. Transition matrix $P_\ell$ for such chain is large and is hard to be described precisely. But if we do not consider the final state, then transition matrix is symmetric: for mutating from individual $a$ to individual $b$ we need to flip exactly the same set of bits as for mutating from individual $b$ to individual $a$. Symetricity of this matrix will give us some simplifications in our analysis. For example we will use the fact that eigenvectors of such matrix are ortogonal. We will call this chain \textit{the individuals' chain}. Aslo we will call the space of real vectors of size $N$ \textit{the individuals' space}.
 
-Another Markov's chain that can represent the plateau is a chain that contains exactly $k$ states, and $i$-th state represents all the individuals that have $n - k + i$ one-bits. Also it has a final state to represent optimum. Transition matrix $P_\ell$ of this chain is easy to descrbe, however it is not symmetric, that deprives us the ability to use the properties of symmetric matrices. We call such chain \textit{the layers' chain} and we call the space of real vectors of length $k$ \textit{the layers' space}.
+Another Markov's chain that can represent the plateau is a chain that contains exactly $k$ states, and $i$-th state represents all the individuals that have $n - k + i$ one-bits and we will call it \textit{the $i$-th level}. Also this chain has a final state to represent optimum. Transition matrix $P$ of this chain is easy (or at least possible) to descrbe, however it is not symmetric, that deprives us the ability to use the properties of symmetric matrices. We call such chain \textit{the levels' chain} and we call the space of real vectors of length $k$ \textit{the levels' space}.
 
-There is a natural mapping from the layers space to the individuals space. Every vector $x = (x_0, \dots, x_{k - 1})$ can be mapped to vector $\phi(x) = (y_0, \dots, y_{N - 1}),$ where $y_i = x_j / \binom{n}{k - j}, $ if $i$-th individual is in $j$-th layer. This mapping has several good properties:
+There is a natural mapping from the levels space to the individuals space. Every vector $x = (x_0, \dots, x_{k - 1})$ can be mapped to vector $\phi(x) = (y_0, \dots, y_{N - 1}),$ where $y_i = x_j / \binom{n}{k - j}, $ if $i$-th individual belongs to the $j$-th level. This mapping can be seen in the following way. If $x$ is a distribution of some mass (that may be even negative) over the levels of the plateau, then this distribution of this mass inside each level should be uniform over all the individuals of each level. It is justified by the fact that all the transitions in our Markov's process are independent on the numbering of the bits of the individual. So every re-indexing of the bits should not affect the mass stored in every individual and thus we have uniform distribution of this mass inside each level. This mapping has several good properties:
 
 \begin{enumerate}
-  \item This mapping is linear: $\phi(\alpha x_1 + \beta x_2) = \alpha \phi(x_1) + \beta \phi(x_2),$ where $\alpha, \beta \in \mathbb{R}.$ This property follows right fro the definition of $\phi.$
-  \item $\phi(x P_i) = \phi(x) P_\ell.$ To understand this property, consider any vector from each space as a distribution of some mass over the states of the corresponding chain. In this case application of transition matrix to the vector is the same as performing this transition of the mass inside the Markov's chain. And as long as both Markov's chains represent the same process, then transition will be the same, and we 
+  \item This mapping is linear: $\phi(\alpha x_1 + \beta x_2) = \alpha \phi(x_1) + \beta \phi(x_2),$ where $\alpha, \beta \in \mathbb{R}.$ This property follows right from the definition of $\phi.$
+  \item $\phi(x P) = \phi(x) P_\ell.$ To justify this property, let us notice two facts. First, if some mass vector $y$ from the individuals space has a uniform distribution of the mass inside each level, then after applying matrix $P_\ell$ to this vector this property will remain due to the symmetry of the space over the re-indexing of the bits numbers. Thus, if there is a corresponding vector $x_1$ from the levels' space for vector $y$, then there is some corresponding vector $x_2$ from the levels' space for vector $yP_\ell.$ Secondly, transition of mass between levels in matrix $P_\ell$ is right the same as in the matrix $P.$ Thus, $x_2 = x_1 P.$
+  \item From the previous properties we can see that if $x$ is an eigenvector for matrix $P$, then $\phi(x)$ is an eigenvector for matrix $P_\ell$ with the same corresponding eigenvalue. Therefore, the spectrum of the matrix $P$ is a subset of the spectrum of matrix $P_\ell:$ $\sigma(P) \subset \sigma(P_\ell).$
+  \item If we use manhatten measure in both spaces, then $|x| = |\phi(x)|$ as all the components of $\phi(x)$ that are from the same level have the same sign. Notice that this property does not stand for the euclidian measure.
 \end{enumerate}
 
-\section{Initial Distribution}
-
-If we get to the plateau from the individual with $(n - k - 1)$ one-bits\dots
+In this work we will use both manhatten measure and euclidean measure. We refer to the manhatten measure of vector $x$ as $|x| = \sum\limits_{i} |x_i|.$ And we refer to the euclidean measure of vector $x$ as $|x|_e = \sqrt{\sum\limits_i x_i^2}.$
 
 \section{Spectrum of the Transition Matrix}
 
-Consider the matrix $P$ that is the transition matrix for the layers' chain. We can write down its elements $p_i^j$ in the following way:
+Consider the matrix $P$ that is the transition matrix for the levels' chain. We can write down its elements $p_i^j$ in the following way:
 
 \begin{align*}
   p_i^j = \begin{cases}
     0, \text{ if } i = k, j \ne k, \\
     1, \text{ if } i = j = k, \\
     \sum\limits_{m = 0}^{k - j} \binom{k - i}{j - i + m} \binom{n - k + i}{m} \left(\frac{\alpha}{n}\right)^{j - i + 2m} \left(1 - \frac{\alpha}{n}\right)^{n - j + i - 2m}, \text{ if } j > i, \\
-      \sum\limits_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\alpha}{n}\right)^{i - j + 2m} \left(1 - \frac{\alpha}{n}\right)^{n - i + j - 2m}, \text{ if } j < i, \\
-      1 - \sum\limits_{m = 0, m \ne i}^k p_i^m, \text{ if } j = i. \\
+      \sum\limits_{m = 0}^{k - i} \binom{k - i}{m} \binom{n - k + i}{i - j + m} \left(\frac{\alpha}{n}\right)^{i - j + 2m} \left(1 - \frac{\alpha}{n}\right)^{n - i + j - 2m}, \text{ if } j < i \text{ and } i \ne k, \\
+      1 - \sum\limits_{m = 0, m \ne i}^k p_i^m, \text{ if } j = i \ne k. \\
   \end{cases}
 \end{align*}
 
@@ -81,45 +81,192 @@ Let us also notice the magnitude of each element of the matrix. If $j < i,$ then
 
 The most important thing is magnitude of the $p_i^i.$ As long as $p_i^i = 1 - \sum\limits_{j \ne i} p_i^j$ and as we know the magnitues of all the $p_i^j$, then $p_i^i = 1 - \sum\limits_{j = 1}^{i} \frac{\alpha^j}{j!}e^{-\alpha} + o(1).$  It is a constant that is not grater than $1$ (this bound is almost hit for $i = 0$) and not less then $e^{-\alpha}$ (this bound is almost hit for $i = k - 1$ for large values of $k$).
 
-Now to find the spectrum of this matrix we should find all the roots of its characteristic polynomial $\chi(\lambda)$ which is determinant of the matrix $(P - \lambda I):$
+Now to find the spectrum of this matrix we should find all the roots of its characteristic polynomial $\chi(\lambda)$ which is the determinant of the matrix $(P - \lambda I):$
 \begin{align*}
   \chi(\lambda) = \det (P - \lambda I) = \sum\limits_{\sigma \in S_n} \text{sgn}(\sigma) \prod\limits_{i = 0}^{k - 1}(P - \lambda I)_{i, \sigma{i}},
 \end{align*}
-where $S_n$ is a set of all the permutations of the set $[0..k - 1].$ Notice that for all permutations, except $\sigma_0 = (0, 1, \dots, k - 1)$ production under the sum contains at least one $(P - \lambda I)_{i, j},$ where $j > i$. And this element $(P - \lambda I)_{i, j} = p_i^j = o(1)$. Other elements of the production are either $p_i^j$ or $(p_i^i - \lambda),$ but in bith cases their absolute value can be bounded above by one. Thus, characteristical polnomial can be written in the following way:
+where $S_n$ is a set of all the permutations of the set $[0..k - 1].$ Notice that for all permutations, except $\sigma_0 = (0, 1, \dots, k - 1)$ production under the sum contains at least one $(P - \lambda I)_{i, j},$ where $j > i$. And this element $(P - \lambda I)_{i, j} = p_i^j = o(1)$. Other elements of the production are either $p_i^j$ or $(p_i^i - \lambda),$ but in both cases their absolute value can be bounded above by one. Thus, characteristical polnomial can be written in the following way:
 
 \begin{align*}
   \chi(\lambda) = \prod\limits_{i = 0}^{k - 1} (p_i^i - \lambda) + o(1).
 \end{align*}
 
-As long as all the coefficients of this polynomial are almost constants over $n$, then we can consider it as slight movement of the polynomial along the vertical axis. Therefore, its roots are inside some neighbourhood of the roots of $\prod\limits_{i = 0}^{k - 1} (p_i^i - \lambda).$ And radius of these neighbourhoods converges to zero as $n$ tends to infinity.
+As long as all the coefficients of this polynomial are almost constants over $n$, then we can consider it as slight movement of the polynomial without $o(1)$ along the vertical axis. Therefore, its roots are inside some neighbourhood of the roots of $\prod\limits_{i = 0}^{k - 1} (p_i^i - \lambda).$ And radius of these neighbourhoods converges to zero as $n$ tends to infinity. Moreover, all the roots are real numbers, as $\sigma(P) \subset \sigma(p_\ell)$ and $\sigma(P_\ell)$ consists of only real numbers, as $P_\ell$ is a symmetric matrix.
 
 So we can say that the spectrum of matrix $P$ is $\{p_i^i \pm o(1)\}_{i = 0}^{k - 1}.$ Notice the following facts about this spectrum:
 \begin{itemize}
 \item All the elements of the spectrum are positive.
-\item The minimal element of the spectrum is not less than $1/e - o(1).$
-\item The gratest element of the spectrum is $1 - o(1).$
-\item The second greatest element of the spectrum is $p_1^1 (1 + o(1)) = 1 - 1/e + o(1).$
+\item The minimal element of the spectrum $\lambda_{k - 1}$ is not less than $1/e - o(1).$
+\item The gratest element of the spectrum $\lambda_0$ is $1 - o(1).$ Actually from Perron-Frobenius~\cite{} theorem we can conclude even more precise bounds for this eigenvalue: $\lambda_0 \in [1 - \max\{p_i^k\}, 1 - \min\{p_i^k\}],$ but we do not need such precision, except the fact that $\lambda_0 < 1.$
+\item The second greatest element of the spectrum $\lambda_1$ is $p_1^1 (1 + o(1)) = 1 - 1/e + o(1).$
 \end{itemize}
 
-\section{Stationary Conditional Distribution}
+\section{Runtime analysis}
 
-Perron-Frobenius theorem~\cite{} states that for positive matrices the greatest eigenvalue has only one-dimensional eigenspace. Also this theorem claims that eigenvector for the greatest eigenvalue has all the comonents with the same sign and it does not have any zero component. Let us define $\pi^*$ as such an eigenvector for matrix $P.$ Aslo let us define $u$ as a distribution that is uniform over all the individuals over the plateau. It means that each level has a probability that is propotional to the size of the level:
+Perron-Frobenius theorem~\cite{} states that for positive matrices the greatest eigenvalue has only one-dimensional eigenspace. Also this theorem claims that eigenvector for the greatest eigenvalue has all the components with the same sign and it does not have any zero component. Let us define $\pi^*$ as such an eigenvector for matrix $P$ and let it be normalized in such way that $|\pi^*| = 1,$ so it would be a stochastic vector and could be considered as a distribution over the levels of the plateau. Aslo let us define $u$ as a probability distribution in the levels' space that is uniform over all the individuals over the plateau. It means that each level has a probability mass that is propotional to the size of the level:
 
 \begin{align*}
-  u_i = \binom{n}{k - i} / \sum\limits_{j = 0}^{k - 1} \binom{n}{k - j}.
+  u_i = \binom{n}{k - i} / \sum\limits_{j = 0}^{k - 1} \binom{n}{k - j} = \binom{n}{k - i}N^{-1}.
 \end{align*}
 
-Let $e^i$ be the $i$-th eigenvector of matrix $P$ that correspond to the $i$-th eigenvalue $\lambda_i$ that are sorted in descending order. As we have said above, $e^0 = \pi^*.$ Let all $e^i$ be normilized in such way that $\sum\limits_{j = 0}^{k - 1} |e_j^i| = 1.$
+Let $e^i$ be the $i$-th eigenvector of matrix $P$ that corresponds to the $i$-th largest eigenvalue $\lambda_i.$ As scaling of eigenvectors does not change anything in our calculations, let us take $e^0$ such that $|e^0| = 1$ and thus $e^0 = \pi^*.$ For $i$ that are different from zero we do not care about their normalization.
 
 Set of $\{e^i\}_{i = 0}^{k - 1}$ form the basis of the $\mathbb{R}^k.$ It means that there exists the only one set of constants constants $(c_0, c_1, \dots, c_{k - 1})$ such that $u = \sum\limits_{i = 0}^{k - 1} c_i e^i.$
 
-\begin{lemma}
-$|c_i| \le 1$ for every $i \in [0..k - 1].$
+\begin{lemma}\label{lemma_uniform}
+The uniform distribution is almost $\pi^*$: for every $j \in [0..k-1]$ $\pi^* = u_j (1 + O(1/\sqrt{n})).$
 \end{lemma}
 
 \begin{proof}
-Every eigenvector in the space of distributions over layers has a corresponding vector in the space of distributins over individuals.
+
+Let us define $U$ as $\phi(u)$ and $U^i$ as $c_i\phi(e^i)$, so that $U$ is a uniform distribution vector in the individuals' space and $U^i$ are eigenvectors of $P_\ell.$
+
+Because of linearity of $\phi$ we can say that $U = \sum\limits_{i = 0}^{k - 1} U^i,$ so $U^i$ are the components of vector $U$ in the basis of eigenvalues of $P_\ell,$ and they are ortoganal to each other.
+
+For every $j \in [0..N-1]$ the following equality holds:
+
+\begin{align*}
+  U_j = \sum\limits_{i = 0}^{k - 1} U^i.
+\end{align*}
+
+Recall that $U_j = \frac{1}{N}$ for every $j.$ So we can find $j$-th component of $U^0:$
+
+\begin{align*}
+  U_j^0 = U_j - \sum\limits_{i = 1}^{k - 1} U_j^i = U_j \left(1 - \frac{\sum\limits_{i = 1}^{k - 1} U_j^i}{U_j}\right) = U_j \left(1 - N\sum\limits_{i = 1}^{k - 1} U_j^i\right)
+\end{align*}
+
+So to prove the lemma we need to prove that for every $j$ we have $N\sum\limits_{i = 1}^{k - 1} U_j^i = O(1/\sqrt{n}).$
+
+To do so let us consider the vector $U - UP_\ell.$ On the one hand, its elements are very small:
+
+\begin{align*}
+  (U - UP_\ell)_j = U_j - \sum\limits_{i = 0}^{N - 1} p_i^j U_i = \frac{1}{N} \left( 1 - \sum\limits_{i = 0}^{N - 1} p_j^i\right) = \frac{p_j^N}{N},
+\end{align*}
+where $p_j^N$ is the probability to leave the plateau from the $j$-th individual. So the euclidean measure of this vector is also very small:
+
+\begin{align*}
+|U - UP_\ell|_e &= \sqrt{\sum\limits_{j = 0}^{N - 1} \left(\frac{p_j^N}{N}\right)^2} = \frac{1}{N} \sqrt{\sum\limits_{i = 0}^{k - 1} \binom{n}{k - i} \left(\frac{\alpha}{n}\right)^{2(k - i)} e^{-2\alpha} (1 + o(1))} \\
+&= \frac{1}{N} \sqrt{\frac{\alpha^2}{ne^2} + o(1/n)} = \frac{\alpha}{\sqrt{n}eN} (1 + o(1)).
+\end{align*}
+
+On the other hand if we recall that $U^i$ are eigenvectors, we can write the following equation:
+
+\begin{align*}
+  U - UP_\ell = \sum\limits_{i = 0}^{k - 1} U^i - \sum\limits_{i = 0}^{k - 1} \lambda_i U^i = \sum\limits_{i = 0}^{k - 1} (1 - \lambda_i) U^i
+\end{align*}
+
+As all the $U^i$ are ortogonal, for every $i \in [0..k - 1]$ we can say that
+
+\begin{align*}
+  |(1 - \lambda_i) U^i|_e \le |U - UP_\ell|_e \approx \frac{\alpha}{\sqrt{n} e N}.
+\end{align*}
+
+And an absolute value of every component of the vector can not be greater than the vector's euclidean measure:
+
+\begin{align*}
+  |(1 - \lambda_i) U_j^i| \le |(1 - \lambda_i) U^i|_e \le \frac{\alpha}{\sqrt{n} e N} (1 + o(1)).
+\end{align*}
+
+For every $j$ we can write the following bound:
+
+\begin{align*}
+  |N\sum\limits_{i = 1}^{k - 1} U_j^i| &\le N\sum\limits_{i = 1}^{k - 1} |U_j^i| \le N\sum\limits_{i = 1}^{k - 1} \frac{\alpha}{\sqrt{n} e N (1 - \lambda_i)} (1 + o(1)) \\
+  & \le \frac{\alpha (k - 1)}{\sqrt{n}e (1 - \lambda_1)} = O\left(\frac{1}{\sqrt{n}}\right).
+\end{align*}
+
+Finally,
+
+\begin{align*}
+  \phi(\pi^*) = \frac{U^0}{|U^0|} = \frac{U^0}{(1 + O(1/\sqrt{n}))} = U^0 (1 + O(1/\sqrt{n})),
+\end{align*}
+thus for every $j$ it is true that:
+\begin{align*}
+  \pi_j^* = c_0 e_j^0 (1 + O(1/\sqrt{n})) = u_j (1 + O(1/\sqrt{n})).
+\end{align*}
+
+
 \end{proof}
 
+The overal meaning of this lemma is following: as long as vector $u$ almost does not change under the application of matrix $P$ to it and as long as this martix has the largest eigenvalue that is $\lambda_0 = (1 - o(1)$ and the second eigenvalue is separated from it, then $u$ almost does not differ from the eigenvector corresponding to $\lambda_0$.
+
+\begin{theorem}
+  The expected runtime of the $(1 + 1)$-EA on the plateau around the optimum of radius $k$ is $N \left( e^{-\alpha} \sum\limits_{i = 1}^k \frac{\alpha^i}{i!}\right)^{-1} (1 + o(1)).$
+\end{theorem}
+
+\begin{proof}
+  To prove this lemma we will use the fact that the expectaton of any random variable $X$ that takes only integer non-negative values is $E[X] = \sum\limits_{t = 1}^{+\infty} \Pr[X \ge t].$
+
+  If we have some initial distribution vector over the levels of the plateau $\pi,$ then the probability that runtime is not less than $t$ is the probability to stay on the plateau after $t$-th itaration that is $|\pi P^t|.$ So we have the following equation for the expected runtime:
+
+\begin{align*}
+  E[T] = \sum\limits_{t = 0}^{+\infty} |\pi P^t|.
+\end{align*}
+
+Now we should estimate $|\pi P^t|.$ For this purpose we will decompose $\pi$ into sum of eigenvectors of $P:$
+
+\begin{align*}
+  \pi = \sum\limits_{i = 0}^{k - 1} \pi^i.
+\end{align*}
+
+For the upper bound on runtime we can say:
+
+\begin{align*}
+  E[T] = \sum\limits_{t = 0}^{+\infty}|\pi P^t| \le \sum\limits_{t = 0}^{+\infty} \sum\limits_{i = 0}^{k - 1} \lambda_i^t |\pi^i| = \sum\limits_{i = 0}^{k - 1} |\pi^i| \sum\limits_{t = 0}^{+\infty} \lambda_i^t = \sum\limits_{i = 0}^{k - 1} \frac{|\pi^i|}{1 - \lambda_i}.
+\end{align*}
+
+In the same way we can say for lower bound:
+\begin{align*}
+  E[T] = \sum\limits_{t = 0}^{+\infty}|\pi P^t| \ge \sum\limits_{t = 0}^{+\infty} \left(\lambda_0^t |\pi^0| - \sum\limits_{i = 1}^{k - 1} \lambda_i^t |\pi^i|\right) = \frac{|\pi^0|}{1 - \lambda_0} - \sum\limits_{i = 0}^{k - 1} \frac{|\pi^0|}{1 - \lambda_i}.
+\end{align*}
+
+
+For $i \ne 0$ $\frac{1}{1 - \lambda_i} \le e.$ Also it is easy to give a very rough bound for all $|\pi_i|:$
+
+\begin{align*}
+|\pi^i| = |\phi(\pi^i)| \le \sqrt{N}|\phi(\pi^i)|_e \le \sqrt{N}|\phi(\pi)|_e \le \sqrt{N}|\phi(\pi)| = \sqrt{N}.
+\end{align*}
+
+It is a very rough bound, but it is enough for us. It gives us the following result:
+
+\begin{align*}
+  \sum\limits_{i = 1}^{k - 1} \frac{|\pi^i|}{1 - \lambda_i} \le (k - 1)e\sqrt{N} = O(\sqrt{N}).
+\end{align*}
+
+Next we should estimate is $|\pi^0|$ and $\lambda_0$.
+
+First, to find $|\pi^0|$ let us say that $\pi^0 = |\pi^0|e^0,$ where $e^0$ is an eigenvector corresponding to $\lambda_0$ which has a manhatten measure of one: $|e^0| = 1$. Earlier we refered to this vector as $\pi^*,$ as we considered it as a distribution over the states of the chain, but here we call it $e^0$ to underline that $\phi(e^0)$ is one of the eigenvectors that form up the orthogonal (but not orthonormal) basis of the individuals' space. We know from Lemma~\ref{lemma_uniform} that all the components of $\phi(e^0)$ are almost the same as in the uniform distribution: $\phi(e^0)_j = \frac{1 + O(1/\sqrt{n})}{N}.$
+
+As long as $\phi(\pi^0)$ is a projection of $\phi(\pi)$ to the eigenspace of $\lambda_0$ in the individuals' space, we can consider $|\pi^0|$ as a coordinate of the $\phi(\pi)$ in the basis of eigenvectors that corresponds to the basis vector $\phi(e^0).$ We can do in the following way:
+
+\begin{align*}
+  |\pi^0| = |\phi(\pi^0)| = \frac{<\phi(\pi^0), \phi(e^0)>}{<\phi(e^0), \phi(e^0)>} = \frac{\sum\limits_{j = 0}^{N - 1} \pi_j^0 \frac{1 + O(1/\sqrt{n})}{N}}{\sum\limits_{j = 0}^{N - 1} \left( \frac{1 + O(1/\sqrt{n})}{N}\right)^2} = 1 + O(1/\sqrt(n)).
+\end{align*}
+
+To estimate $\lambda_0$ notice that $(1 - \lambda_0)$ is the mass that is lost by the vector $\pi^*$ after the application of the matrix $P.$ Here is the formal proof of this fact:
+
+\begin{align*}
+  1 - \lambda_0 &= |(1 - \lambda_0)\pi^*| = |\pi^* - \pi^* P| = \sum\limits_{i = 0}^{k - 1} |\pi_i^* - \sum\limits_{j = 0}^{k - 1} \pi_j^* p_j^i| \\
+  &= \sum\limits_{i = 0}^{k - 1} (\pi_i^* - \sum\limits_{j = 0}^{k - 1} \pi_j^* p_j^i) = 1 - \sum\limits_{i = 0}^{k - 1} \sum\limits_{j = 0}^{k - 1} \pi_j^* p_j^i \\
+  &= 1 - \sum\limits_{j = 0}^{k - 1} \pi_j^* \sum\limits_{i = 0}^{k - 1} p_j^i = 1 - \sum\limits_{j = 0}^{k - 1} \pi_j^* (1 - p_j^k) = \sum\limits_{j = 0}^{k - 1} \pi_j^* p_j^k.
+\end{align*}
+
+This lost mass can be calculated:
+
+\begin{align*}
+  1 - \lambda_0 &= \sum\limits_{i = 0}^{k - 1} \pi_i^* p_i^k = \sum\limits_{i = 0}^{k - 1} \binom{n}{k - i}N^{-1}(1 + O(1/\sqrt{n})) \frac{\alpha^{k - i}}{n^{k - i}}e^{-\alpha} (1 + o(1)) \\
+  &= \frac{1}{N} \sum\limits_{i = 1}^{k} \frac{\alpha^i}{i!}e^{-\alpha} (1 + o(1)).
+\end{align*}
+
+Finally, we have the following upper bound on the runtme:
+
+\begin{align*}
+  E[T] \le \frac{|\pi^0|}{1 - \lambda_0} + O(\sqrt{N}) = \frac{N}{e^{-\alpha} \sum\limits_{i = 1}^k \frac{\alpha^i}{i!}} (1 + o(1))
+\end{align*}
+and the same lower bound:
+\begin{align*}
+  E[T] \ge \frac{|\pi^0|}{1 - \lambda_0} - O(\sqrt{N}) = \frac{N}{e^{-\alpha} \sum\limits_{i = 1}^k \frac{\alpha^i}{i!}} (1 + o(1))
+\end{align*}
+
+\end{proof}
 
 \end{document}
